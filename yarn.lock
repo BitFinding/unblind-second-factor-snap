@@ -2624,12 +2624,12 @@ __metadata:
   linkType: hard
 
 "@metamask/base-controller@npm:^7.0.1, @metamask/base-controller@npm:^7.0.2":
-  version: 7.0.2
-  resolution: "@metamask/base-controller@npm:7.0.2"
+  version: 7.1.0
+  resolution: "@metamask/base-controller@npm:7.1.0"
   dependencies:
     "@metamask/utils": ^10.0.0
     immer: ^9.0.6
-  checksum: c9c706077af613e704d166a1795c94e2b92e6da304514994bbc6903c4796f9a752028b86a08cf4ece43ab069d5232af468e5d7b571a85d18b80a5072619ba5cb
+  checksum: e507e686f79c6bcf3648bd9a023e016388bf6cc4a8c2a1f9f4afbb11939de785f0d0375ff18e09aff7968b3941da4614cf7ef354f3017ecca6d0268dce5d1ebd
   languageName: node
   linkType: hard
 
