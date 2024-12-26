@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": "./",
     "resolveJsonModule": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "strict": true
   },
   "include": ["src", "gatsby-browser.tsx", "gatsby-config.ts", "gatsby-ssr.tsx"]
 }

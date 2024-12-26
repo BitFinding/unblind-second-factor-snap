@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example",
+  "description": "Visualize your transactions, and protect your assets.",
+  "proposedName": "Bitfinding Guard",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "X9pobn7XT2CgX4T9N6gcQP09HZhRlnDzNPN562ACt+k=",
+    "shasum": "qv3SkQtf/cjsm3b/wSjEumOGivs0DwRMImSWyvD7qWI=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -18,6 +18,13 @@
   },
   "initialPermissions": {
     "snap_dialog": {},
+    "endowment:signature-insight": {},
+    "endowment:transaction-insight": {
+      "allowTransactionOrigin": true
+    },
+    "endowment:ethereum-provider": {},
+    "snap_manageState": {},
+    "endowment:network-access": {},
     "endowment:rpc": {
       "dapps": true,
       "snaps": false

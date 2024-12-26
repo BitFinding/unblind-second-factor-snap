@@ -4,15 +4,15 @@ import {
   ConnectButton,
   InstallFlaskButton,
   ReconnectButton,
-  SendHelloButton,
+  SendTransactionButton,
   Card,
 } from '../components';
 import { defaultSnapOrigin } from '../config';
 import {
   useMetaMask,
-  useInvokeSnap,
   useMetaMaskContext,
   useRequestSnap,
+  useSendTransaction,
 } from '../hooks';
 import { isLocalSnap, shouldDisplayReconnectButton } from '../utils';
 
@@ -104,14 +104,24 @@ const Index = () => {
   const { error } = useMetaMaskContext();
   const { isFlask, snapsDetected, installedSnap } = useMetaMask();
   const requestSnap = useRequestSnap();
-  const invokeSnap = useInvokeSnap();
+  const { sendTransaction, getAccount } = useSendTransaction();
 
   const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
     ? isFlask
     : snapsDetected;
 
-  const handleSendHelloClick = async () => {
-    await invokeSnap({ method: 'hello' });
+  const handleTransaction = async () => {
+    const accounts: string[] = await getAccount();
+
+    const hash = await sendTransaction({
+      from: accounts[0] as string,
+      to: '0xc1A2124E4AE4962A61Ac30e7f8A0D4D0F70123Cb',
+      gas: '0x76c0',
+      value: '0x8ac7230489e80000',
+      data: '0x',
+      gasPrice: '0x4a817c800',
+    });
+    console.log(hash);
   };
 
   return (
@@ -173,12 +183,11 @@ const Index = () => {
         )}
         <Card
           content={{
-            title: 'Send Hello message',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
+            title: 'Send Transaction',
+            description: 'Send a Transaction',
             button: (
-              <SendHelloButton
-                onClick={handleSendHelloClick}
+              <SendTransactionButton
+                onClick={handleTransaction}
                 disabled={!installedSnap}
               />
             ),
