@@ -15,26 +15,49 @@ export const onTransaction: OnTransactionHandler = async (data) => {
   const transaction = data.transaction as EIP1559Transaction;
   // Send Tx to bitfinding api
   // generate qr/hash/
-  const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
+  //const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
+  console.log(`Tx: ${JSON.stringify(data.transaction)}`)
+
+    // If nonce field is empty, get it from the rpc call
+    // if(!transaction.nonce){
+    //   const nonceRequest = await ethereum.request({
+    //     method: 'eth_getTransactionCount',
+    //     params: [transaction.from, 'latest'],
+    //   });
+    //   console.log(`Nonce: ${nonceRequest}`);
+    // transaction.nonce = (parseInt(nonceRequest as string, 16) + 1).toString() || '0';
+    // }
+
+  const url = new URL(`https://localhost:3001/unblind/qr`);
   url.searchParams.append('chainId', chainId);
   url.searchParams.append('from', transaction.from);
   url.searchParams.append('to', transaction.to);
   url.searchParams.append('value', transaction.value);
-  url.searchParams.append('gas', transaction.gas);
+url.searchParams.append('gas', transaction.gas);
   url.searchParams.append('maxFeePerGas', transaction.maxFeePerGas);
   url.searchParams.append('maxPriorityFeePerGas', transaction.maxPriorityFeePerGas);
   url.searchParams.append('data', transaction.data);
   url.searchParams.append('origin', transactionOrigin ?? '');
- 
-  const qrUrlRequest = await fetch(url.toString());
-  const body = await qrUrlRequest.text();
-  
+  url.searchParams.append('nonce', transaction.nonce);
+    
+  interface BitfindingData {
+    url: string;
+    svg: string;
+}
+  let bitfindingData: BitfindingData | undefined;
+  console.log("AAA")
+    const bitfindingRequest = await fetch(url.toString());
+    console.log("BBB")
+    bitfindingData = await bitfindingRequest.json();
+    console.log("CCC")
+    console.log("Bitfinding Data: ", bitfindingData);
+
   return {
     content: (
       <Box>
         <Heading>Bitfinding QR</Heading>
-        <Link href={url.toString()}>Bitfinding</Link>
-        <Image src={body} />
+        <Text >{bitfindingData!.url}</Text>
+        {bitfindingData ? <Image src={bitfindingData.svg} /> : null}
       </Box>
     ),
     severity: 'critical',
