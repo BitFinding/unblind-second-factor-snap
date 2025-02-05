@@ -2744,15 +2744,15 @@ __metadata:
   linkType: hard
 
 "@metamask/eth-json-rpc-provider@npm:^4.1.5":
-  version: 4.1.6
-  resolution: "@metamask/eth-json-rpc-provider@npm:4.1.6"
+  version: 4.1.8
+  resolution: "@metamask/eth-json-rpc-provider@npm:4.1.8"
   dependencies:
-    "@metamask/json-rpc-engine": ^10.0.1
-    "@metamask/rpc-errors": ^7.0.1
+    "@metamask/json-rpc-engine": ^10.0.3
+    "@metamask/rpc-errors": ^7.0.2
     "@metamask/safe-event-emitter": ^3.0.0
-    "@metamask/utils": ^10.0.0
+    "@metamask/utils": ^11.1.0
     uuid: ^8.3.2
-  checksum: 089f10444304527626c044b49dac741e1ee34dca60dc582915b8a4df5545caa46632762a1e160b15d88df756140d3eba849e0a685e49d1bd4d7856219b40a4c3
+  checksum: 08f610e318ff32e37afb9d21ed3e55d655c6382c76af70427a88468e89725f8374bd9e4d2b3672e7319c2030d5b8c3e3d7924a3143b83e96d581efd08ece068b
   languageName: node
   linkType: hard
 
@@ -2800,6 +2800,17 @@ __metadata:
     "@metamask/safe-event-emitter": ^3.0.0
     "@metamask/utils": ^10.0.0
   checksum: 277c68cf0036d62c9a1528e9d7e55e000233d02a55fb652edcc16b6149631346d34fe3fefaab13bc55377405e79293afdde5b6e3b61d49a2ce125ca50d7eafe1
+  languageName: node
+  linkType: hard
+
+"@metamask/json-rpc-engine@npm:^10.0.3":
+  version: 10.0.3
+  resolution: "@metamask/json-rpc-engine@npm:10.0.3"
+  dependencies:
+    "@metamask/rpc-errors": ^7.0.2
+    "@metamask/safe-event-emitter": ^3.0.0
+    "@metamask/utils": ^11.1.0
+  checksum: 1ad7e23e3a4017da8bb70a8ed8d4932475d42c60ace0d088f462a8e438cbf9154eaec4ba79621661fed95ff50ff6fa3db479404086238ab9eb5b3e9153c1051c
   languageName: node
   linkType: hard
 
@@ -2986,6 +2997,16 @@ __metadata:
     "@metamask/utils": ^10.0.0
     fast-safe-stringify: ^2.0.6
   checksum: 20b300d26550c667a635eb5f97784c80d86c0b765433a32a9bced5b4c2a05a783cf2cd3a2bfe2aca6382181f53458bd2e7dc1bbb02e28005d3b4d0f3a46ca3ac
+  languageName: node
+  linkType: hard
+
+"@metamask/rpc-errors@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "@metamask/rpc-errors@npm:7.0.2"
+  dependencies:
+    "@metamask/utils": ^11.0.1
+    fast-safe-stringify: ^2.0.6
+  checksum: 262a1ab57121e277eb979325d8e4335b9f4194c5acd0138ee0032db35b4e20ea0423badb5dad4bdf6abb85d22b476377f17911a54f82b3b1a2bdffc36654d028
   languageName: node
   linkType: hard
 
@@ -3311,6 +3332,23 @@ __metadata:
     semver: ^7.5.4
     uuid: ^9.0.1
   checksum: a5072f87157f6763328767bf1ddc01deb94e13f32af58d0993e0450e7e211fb29882280a1013cbdc7752b152a662be3d9beef8129a9097dba7d465389c398b3c
+  languageName: node
+  linkType: hard
+
+"@metamask/utils@npm:^11.1.0":
+  version: 11.1.0
+  resolution: "@metamask/utils@npm:11.1.0"
+  dependencies:
+    "@ethereumjs/tx": ^4.2.0
+    "@metamask/superstruct": ^3.1.0
+    "@noble/hashes": ^1.3.1
+    "@scure/base": ^1.1.3
+    "@types/debug": ^4.1.7
+    debug: ^4.3.4
+    pony-cause: ^2.1.10
+    semver: ^7.5.4
+    uuid: ^9.0.1
+  checksum: 41ec84e9198969bb5a0e7a1f5426ca886a62f6d47456a1575f60b2712b9078829d0c3a947bbfffd47ca832447591b36b64a4ce767e56a6fc0304e4a1b9ec5231
   languageName: node
   linkType: hard
 
