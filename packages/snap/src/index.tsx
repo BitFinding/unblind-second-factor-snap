@@ -12,7 +12,7 @@ declare global {
  */
 export const onTransaction: OnTransactionHandler = async (data) => {
   const { chainId, transactionOrigin } = data;
-  const transaction = data.transaction as EIP1559Transaction;
+  const transaction = data.transaction;
   // Send Tx to bitfinding api
   // generate qr/hash/
   //const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
@@ -28,17 +28,12 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     // transaction.nonce = (parseInt(nonceRequest as string, 16) + 1).toString() || '0';
     // }
 
-  const url = new URL(`https://localhost:3001/unblind/qr`);
+  const encodedTransaction = Buffer.from(JSON.stringify(transaction)).toString('base64');
+
+  const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
   url.searchParams.append('chainId', chainId);
-  url.searchParams.append('from', transaction.from);
-  url.searchParams.append('to', transaction.to);
-  url.searchParams.append('value', transaction.value);
-url.searchParams.append('gas', transaction.gas);
-  url.searchParams.append('maxFeePerGas', transaction.maxFeePerGas);
-  url.searchParams.append('maxPriorityFeePerGas', transaction.maxPriorityFeePerGas);
-  url.searchParams.append('data', transaction.data);
+  url.searchParams.append('transaction', encodedTransaction);
   url.searchParams.append('origin', transactionOrigin ?? '');
-  url.searchParams.append('nonce', transaction.nonce);
     
   interface BitfindingData {
     url: string;
@@ -55,7 +50,7 @@ url.searchParams.append('gas', transaction.gas);
   return {
     content: (
       <Box>
-        <Heading>Bitfinding QR</Heading>
+        <Heading>Bitfinding second factor</Heading>
         <Text >{bitfindingData!.url}</Text>
         {bitfindingData ? <Image src={bitfindingData.svg} /> : null}
       </Box>
