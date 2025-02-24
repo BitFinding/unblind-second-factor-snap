@@ -1,4 +1,4 @@
-import type { EIP1559Transaction, OnRpcRequestHandler, OnTransactionHandler } from '@metamask/snaps-sdk';
+import type { EIP1559Transaction, OnRpcRequestHandler, OnTransactionHandler, OnSignatureHandler } from '@metamask/snaps-sdk';
 import { Box, Text, Bold, Heading, Image, Link} from '@metamask/snaps-sdk/jsx';
 
 declare global {
@@ -7,52 +7,81 @@ declare global {
   }
 }
 
+interface BitfindingData {
+  url: string;
+  svg: string;
+}
+
+async function getBitfindingQR(params: {
+  chainId?: string;
+  transaction?: string;
+  signature?: string;
+  origin: string;
+}): Promise<BitfindingData> {
+  const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
+  
+  if (params.chainId) {
+    url.searchParams.append('chainId', params.chainId);
+  }
+  if (params.transaction) {
+    url.searchParams.append('transaction', params.transaction);
+  }
+  if (params.signature) {
+    url.searchParams.append('signature', params.signature);
+  }
+  url.searchParams.append('origin', params.origin);
+
+  const bitfindingRequest = await fetch(url.toString());
+  return await bitfindingRequest.json();
+}
+
 /**
  * On Transaction
  */
 export const onTransaction: OnTransactionHandler = async (data) => {
-  const { chainId, transactionOrigin } = data;
-  const transaction = data.transaction;
-  // Send Tx to bitfinding api
-  // generate qr/hash/
-  //const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
-  console.log(`Tx: ${JSON.stringify(data.transaction)}`)
-
-    // If nonce field is empty, get it from the rpc call
-    // if(!transaction.nonce){
-    //   const nonceRequest = await ethereum.request({
-    //     method: 'eth_getTransactionCount',
-    //     params: [transaction.from, 'latest'],
-    //   });
-    //   console.log(`Nonce: ${nonceRequest}`);
-    // transaction.nonce = (parseInt(nonceRequest as string, 16) + 1).toString() || '0';
-    // }
-
+  const { chainId, transactionOrigin, transaction } = data;
   const encodedTransaction = Buffer.from(JSON.stringify(transaction)).toString('base64');
 
-  const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
-  url.searchParams.append('chainId', chainId);
-  url.searchParams.append('transaction', encodedTransaction);
-  url.searchParams.append('origin', transactionOrigin ?? '');
-    
-  interface BitfindingData {
-    url: string;
-    svg: string;
-}
-  let bitfindingData: BitfindingData | undefined;
-  console.log("AAA")
-    const bitfindingRequest = await fetch(url.toString());
-    console.log("BBB")
-    bitfindingData = await bitfindingRequest.json();
-    console.log("CCC")
-    console.log("Bitfinding Data: ", bitfindingData);
+  // TODO: remove me
+  console.log(`Tx: ${JSON.stringify(transaction)}`)
+  
+  const bitfindingData = await getBitfindingQR({
+    chainId,
+    transaction: encodedTransaction,
+    origin: transactionOrigin ?? '',
+  });
 
   return {
     content: (
       <Box>
         <Heading>Bitfinding second factor</Heading>
-        <Text >{bitfindingData!.url}</Text>
-        {bitfindingData ? <Image src={bitfindingData.svg} /> : null}
+        <Text>{bitfindingData.url}</Text>
+        <Image src={bitfindingData.svg} />
+      </Box>
+    ),
+    severity: 'critical',
+  };
+};
+
+export const onSignature: OnSignatureHandler = async (data) => {
+  const { signature, signatureOrigin } = data;
+
+  const encodedSignature = Buffer.from(JSON.stringify(signature)).toString('base64');
+  
+  // TODO: remove me
+  console.log(`Tx: ${JSON.stringify(signature)}`);
+  
+  const bitfindingData = await getBitfindingQR({
+    signature: encodedSignature,
+    origin: signatureOrigin ?? '',
+  });
+  
+  return {
+    content: (
+      <Box>
+        <Heading>Bitfinding second factor</Heading>
+        <Text>{bitfindingData.url}</Text>
+        <Image src={bitfindingData.svg} />
       </Box>
     ),
     severity: 'critical',
@@ -70,8 +99,8 @@ export const onTransaction: OnTransactionHandler = async (data) => {
  * @throws If the request method is not valid for this snap.
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({
-  origin,
-  request,
+    origin,
+    request,
 }) => {
   switch (request.method) {
     case 'eth_sendTransaction':

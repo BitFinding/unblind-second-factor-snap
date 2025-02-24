@@ -22,6 +22,9 @@
     "endowment:transaction-insight": {
       "allowTransactionOrigin": true
     },
+    "endowment:signature-insight": {
+      "allowSignatureOrigin": true
+    },
     "endowment:ethereum-provider": {},
     "snap_manageState": {},
     "endowment:network-access": {},
