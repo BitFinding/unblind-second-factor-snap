@@ -1,8 +1,7 @@
 import type { EIP1559Transaction, OnRpcRequestHandler, OnTransactionHandler, OnSignatureHandler } from '@metamask/snaps-sdk';
 import { Box, Text, Bold, Heading, Image, Link} from '@metamask/snaps-sdk/jsx';
 
-// @ts-ignore
-import * as qrcodegen from './qrcodegen.js';
+import { qrcodegen } from './qrcodegen.js';
 
 declare global {
   interface Window {
@@ -73,18 +72,28 @@ export const onTransaction: OnTransactionHandler = async (data) => {
   // Name abbreviated for the sake of these examples here
     const QRC = qrcodegen.QrCode;
 
+  console.log("QRC!");
+  console.log(QRC);
+  console.log(qrcodegen.QrCode.Ecc.MEDIUM);
+
     // Simple operation
     const qr0 = "Hello, world!";
 
-    const qrCode = QRC.encodeText(qr0, qrcodegen.QrCode.Ecc.MEDIUM);
-    const svg = toSvgString(qr0, 4, "white", "black");
+    console.log("before encodeText");
+  const qrCode = QRC.encodeText(qr0, qrcodegen.QrCode.Ecc.MEDIUM);
+  console.log("after encodeText");
+  console.log(qrCode);
+
+  const svg = toSvgString(qr0, 4, "white", "black");
+  console.log("after toSvgString");
+  console.log(svg);
 
   return {
     content: (
       <Box>
         <Heading>Bitfinding second factor</Heading>
-        <Text>{qr0}</Text>
-        {/* <Image src={svg} /> */}
+              {/* <Text>{qr0}</Text> */}
+        <Image src={svg} />
       </Box>
     ),
     severity: 'critical',
