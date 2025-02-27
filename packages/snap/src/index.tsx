@@ -2,6 +2,7 @@ import type { EIP1559Transaction, OnRpcRequestHandler, OnTransactionHandler, OnS
 import { Box, Text, Bold, Heading, Image, Link} from '@metamask/snaps-sdk/jsx';
 
 import { qrcodegen } from './qrcodegen.js';
+import { deflate, DEFAULT_LEVEL } from './deflate.js';
 
 declare global {
   interface Window {
@@ -54,19 +55,37 @@ function runLengthEncoding(data: string): string {
     return result;
 }
 
-function generateQRCode(data: string): string {
-  // Compress and encode the data
-  const jsonData = JSON.stringify(data);
-  const compressedData = runLengthEncoding(jsonData);
-  const encodedData = Buffer.from(compressedData).toString('base64');
+function compressData(data: string): string {
+  // Convert string to byte array
+  const byteArray = new TextEncoder().encode(data);
   
-  console.log(`Original  ${data}`);
-  console.log(`Encoded `, encodedData);
+  // Convert Uint8Array to regular array for deflate
+  const array = Array.from(byteArray);
+  
+  // Compress using deflate
+  const compressed = deflate(array, DEFAULT_LEVEL);
+  
+  // Convert compressed array to Uint8Array for base64 encoding
+  const compressedArray = new Uint8Array(compressed);
+  
+  // Convert to base64
+  return btoa(String.fromCharCode.apply(null, compressedArray));
+}
+
+async function generateQRCode(data: string): Promise<string> {
+  // Compress and encode the data
+  // const compressedData = runLengthEncoding(jsonData);
+  console.log(`Original: ${data}`);
+  const compressedData = compressData(data);
+    /* const encodedData = Buffer.from(compressedData).toString('base64'); */
+
+    console.log(`Original: ${data}`);
+  console.log(`Compressed and encoded: ${compressedData}`);
 
   // Generate QR code
   const QRC = qrcodegen.QrCode;
-  console.log("before encodeText");
-  const qrCode = QRC.encodeText(encodedData, qrcodegen.QrCode.Ecc.LOW);
+  console.log("Generating QR code");
+  const qrCode = QRC.encodeText(compressedData, qrcodegen.QrCode.Ecc.LOW);
   console.log("after encodeText", qrCode);
   console.log(qrCode);
 
@@ -85,7 +104,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     const { chainId, transactionOrigin, transaction } = data;
   // const encodedTransaction = Buffer.from(JSON.stringify(transaction)).toString('base64');
 
-  const svg = generateQRCode(JSON.stringify(transaction));
+  const svg = await generateQRCode(JSON.stringify(transaction));
 
   return {
     content: (
@@ -101,7 +120,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
 export const onSignature: OnSignatureHandler = async (data) => {
   const { signature, signatureOrigin } = data;
 
-  const svg = generateQRCode(JSON.stringify(signature));
+  const svg = await generateQRCode(JSON.stringify(signature));
   
   return {
     content: (
