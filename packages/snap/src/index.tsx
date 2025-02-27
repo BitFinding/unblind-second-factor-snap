@@ -9,33 +9,6 @@ declare global {
   }
 }
 
-interface BitfindingData {
-  url: string;
-  svg: string;
-}
-
-async function getBitfindingQR(params: {
-  chainId?: string;
-  transaction?: string;
-  signature?: string;
-  origin: string;
-}): Promise<BitfindingData> {
-  const url = new URL(`https://wwwapi.bitfinding.com/unblind/qr`);
-  
-  if (params.chainId) {
-    url.searchParams.append('chainId', params.chainId);
-  }
-  if (params.transaction) {
-    url.searchParams.append('transaction', params.transaction);
-  }
-  if (params.signature) {
-    url.searchParams.append('signature', params.signature);
-  }
-  url.searchParams.append('origin', params.origin);
-
-  const bitfindingRequest = await fetch(url.toString());
-  return await bitfindingRequest.json();
-}
 
 // Returns a string of SVG code for an image depicting the given QR Code, with the given number
 	// of border modules. The string always uses Unix newlines (\n), regardless of the platform.
@@ -81,6 +54,30 @@ function runLengthEncoding(data: string): string {
     return result;
 }
 
+function generateQRCode(data: string): string {
+  // Compress and encode the data
+  const jsonData = JSON.stringify(data);
+  const compressedData = runLengthEncoding(jsonData);
+  const encodedData = Buffer.from(compressedData).toString('base64');
+  
+  console.log(`Original  ${data}`);
+  console.log(`Encoded `, encodedData);
+
+  // Generate QR code
+  const QRC = qrcodegen.QrCode;
+  console.log("before encodeText");
+  const qrCode = QRC.encodeText(encodedData, qrcodegen.QrCode.Ecc.LOW);
+  console.log("after encodeText", qrCode);
+  console.log(qrCode);
+
+  // Convert to SVG
+  const svg = toSvgString(qrCode, 4, "white", "black");
+  console.log("after toSvgString");
+  console.log(svg);
+
+  return svg;
+}
+
 /**
  * On Transaction
  */
@@ -88,32 +85,12 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     const { chainId, transactionOrigin, transaction } = data;
   // const encodedTransaction = Buffer.from(JSON.stringify(transaction)).toString('base64');
 
-  const jsonTransaction = JSON.stringify(transaction);
-  const compressedTransaction = runLengthEncoding(jsonTransaction);
-  const base64Transaction = Buffer.from(compressedTransaction).toString('base64');
-  const encodedTransaction = base64Transaction;
-  
-  // TODO: remove me
-  console.log(`Tx: ${JSON.stringify(transaction)}`)
-  console.log(`Encoded`, encodedTransaction);
-
-  // Name abbreviated for the sake of these examples here
-    const QRC = qrcodegen.QrCode;
-
-  console.log("before encodeText");
-  const qrCode = QRC.encodeText(encodedTransaction, qrcodegen.QrCode.Ecc.LOW);
-  console.log("after encodeText", qrCode);
-  console.log(qrCode);
-
-  const svg = toSvgString(qrCode, 4, "white", "black");
-  console.log("after toSvgString");
-  console.log(svg);
+  const svg = generateQRCode(JSON.stringify(transaction));
 
   return {
     content: (
       <Box>
         <Heading>Bitfinding second factor</Heading>
-              {/* <Text>{qr0}</Text> */}
         <Image src={svg} />
       </Box>
     ),
@@ -124,22 +101,13 @@ export const onTransaction: OnTransactionHandler = async (data) => {
 export const onSignature: OnSignatureHandler = async (data) => {
   const { signature, signatureOrigin } = data;
 
-  const encodedSignature = Buffer.from(JSON.stringify(signature)).toString('base64');
-  
-  // TODO: remove me
-  console.log(`Tx: ${JSON.stringify(signature)}`);
-  
-//   const bitfindingData = await getBitfindingQR({
-//     signature: encodedSignature,
-//     origin: signatureOrigin ?? '',
-//   });
+  const svg = generateQRCode(JSON.stringify(signature));
   
   return {
     content: (
       <Box>
         <Heading>Bitfinding second factor</Heading>
-        <Text>{bitfindingData.url}</Text>
-        <Image src={bitfindingData.svg} />
+        <Image src={svg} />
       </Box>
     ),
     severity: 'critical',
