@@ -58,33 +58,54 @@ async function getBitfindingQR(params: {
 `;
 	}
 
+function runLengthEncoding(data: string): string {
+
+    let result = '';
+    let count = 1;
+
+    for (let i = 0; i < data.length; i++) {
+        let j = i + 1;
+        while (data[i] === data[j]) {
+            count++;
+            if (count === 9) {
+                j++;
+                break;
+            } else {
+                j++;
+            }
+        }
+        result = result.concat(`${count}${data[i]}`);
+        count = 1;
+        i = j - 1;
+    }
+    return result;
+}
+
 /**
  * On Transaction
  */
 export const onTransaction: OnTransactionHandler = async (data) => {
-  const { chainId, transactionOrigin, transaction } = data;
-  const encodedTransaction = Buffer.from(JSON.stringify(transaction)).toString('base64');
+    const { chainId, transactionOrigin, transaction } = data;
+  // const encodedTransaction = Buffer.from(JSON.stringify(transaction)).toString('base64');
 
+  const jsonTransaction = JSON.stringify(transaction);
+  const compressedTransaction = runLengthEncoding(jsonTransaction);
+  const base64Transaction = Buffer.from(compressedTransaction).toString('base64');
+  const encodedTransaction = base64Transaction;
+  
   // TODO: remove me
   console.log(`Tx: ${JSON.stringify(transaction)}`)
-  
+  console.log(`Encoded`, encodedTransaction);
 
   // Name abbreviated for the sake of these examples here
     const QRC = qrcodegen.QrCode;
 
-  console.log("QRC!");
-  console.log(QRC);
-  console.log(qrcodegen.QrCode.Ecc.MEDIUM);
-
-    // Simple operation
-    const qr0 = "Hello, world!";
-
-    console.log("before encodeText");
-  const qrCode = QRC.encodeText(qr0, qrcodegen.QrCode.Ecc.MEDIUM);
-  console.log("after encodeText");
+  console.log("before encodeText");
+  const qrCode = QRC.encodeText(encodedTransaction, qrcodegen.QrCode.Ecc.LOW);
+  console.log("after encodeText", qrCode);
   console.log(qrCode);
 
-  const svg = toSvgString(qr0, 4, "white", "black");
+  const svg = toSvgString(qrCode, 4, "white", "black");
   console.log("after toSvgString");
   console.log(svg);
 
