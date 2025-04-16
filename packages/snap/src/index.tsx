@@ -104,7 +104,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     const { chainId, transactionOrigin, transaction } = data;
   // const encodedTransaction = Buffer.from(JSON.stringify(transaction)).toString('base64');
 
-  const svg = await generateQRCode(JSON.stringify(transaction));
+  const svg = await generateQRCode(JSON.stringify({ chainId, ...transaction }));
 
   return {
     content: (
