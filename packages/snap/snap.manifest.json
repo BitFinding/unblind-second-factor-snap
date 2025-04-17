@@ -1,21 +1,22 @@
 {
-  "version": "0.1.0",
-  "description": "Visualize your transactions, and protect your assets.",
-  "proposedName": "Bitfinding Guard",
+  "version": "0.0.1",
+  "description": "Understand your transactions, and protect your assets.",
+  "proposedName": "Bitfinding Semantic Factor",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/BitFinding/semantic-factor-snap.git"
   },
   "source": {
-    "shasum": "6WO9iXoV+kox1ayR2Mvhb8FQ4cD/0DEJTvbwIUaZPrI=",
+    "shasum": "s88skslNle2as++k1+Gia572ziEpfbaem/U4/tVORZs=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
-        "packageName": "snap",
+        "packageName": "snap-semantic-factor",
         "registry": "https://registry.npmjs.org/"
       }
     }
   },
+  "iconPath": "icon.svg",
   "initialPermissions": {
     "snap_dialog": {},
     "endowment:signature-insight": {

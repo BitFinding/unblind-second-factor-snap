@@ -1,10 +1,10 @@
 {
-  "name": "snap",
-  "version": "0.1.0",
-  "description": "The 'Hello, world!' of MetaMask Snaps, now written in TypeScript.",
+  "name": "snap-semantic-factor",
+  "version": "0.0.1",
+  "description": "Understand your transactions, and protect your assets with Bitfinding Semantic Factor.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/BitFinding/semantic-factor-snap.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "main": "./dist/bundle.js",
