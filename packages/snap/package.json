@@ -1,6 +1,6 @@
 {
   "name": "snap-semantic-factor",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Understand your transactions, and protect your assets with Bitfinding Semantic Factor.",
   "repository": {
     "type": "git",
@@ -10,6 +10,7 @@
   "main": "./dist/bundle.js",
   "files": [
     "dist/",
+    "assets/",
     "snap.manifest.json"
   ],
   "scripts": {
