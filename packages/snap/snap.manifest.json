@@ -10,13 +10,13 @@
     "shasum": "s88skslNle2as++k1+Gia572ziEpfbaem/U4/tVORZs=",
     "location": {
       "npm": {
+        "iconPath": "icon.svg",
         "filePath": "dist/bundle.js",
         "packageName": "snap-semantic-factor",
         "registry": "https://registry.npmjs.org/"
       }
     }
   },
-  "iconPath": "icon.svg",
   "initialPermissions": {
     "snap_dialog": {},
     "endowment:signature-insight": {
