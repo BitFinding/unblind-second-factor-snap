@@ -1,5 +1,5 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Understand your transactions, and protect your assets.",
   "proposedName": "Bitfinding Semantic Factor",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/BitFinding/semantic-factor-snap.git"
   },
   "source": {
-    "shasum": "sBt9cnP9BjYdUgYHn910njTfnBbDMqMBjC5HXA4vsoc=",
+    "shasum": "TH2TgxRBDiKZLbfNL5MxWxfjpnyZMhfDumiPFcqLfac=",
     "location": {
       "npm": {
         "iconPath": "assets/icon.svg",
@@ -26,11 +26,7 @@
       "allowTransactionOrigin": true
     },
     "endowment:ethereum-provider": {},
-    "snap_manageState": {},
-    "endowment:rpc": {
-      "dapps": true,
-      "snaps": false
-    }
+    "snap_manageState": {}
   },
   "manifestVersion": "0.1"
 }
