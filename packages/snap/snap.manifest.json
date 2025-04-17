@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Understand your transactions, and protect your assets.",
   "proposedName": "Bitfinding Semantic Factor",
   "repository": {
@@ -7,10 +7,10 @@
     "url": "https://github.com/BitFinding/semantic-factor-snap.git"
   },
   "source": {
-    "shasum": "bftKXI+3PfonSf2EU67Nbi28TQJTKTfroWbBMpU+U/M=",
+    "shasum": "2X1ooYiYBZuEkV2vhFqFb6FJzYfISo2L1+i5UPSfsJk=",
     "location": {
       "npm": {
-        "iconPath": "icon.svg",
+        "iconPath": "assets/icon.svg",
         "filePath": "dist/bundle.js",
         "packageName": "snap-semantic-factor",
         "registry": "https://registry.npmjs.org/"
