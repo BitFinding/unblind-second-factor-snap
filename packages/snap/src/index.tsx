@@ -135,7 +135,7 @@ async function generateQRCode(data: string): Promise<string> {
   console.log(qrCode);
 
   // Convert to SVG
-  const svg = toSvgString(qrCode, 4, '#1F2A35', '#EF576E');
+  const svg = toSvgString(qrCode, 1, 'white', '#1F2A35');
   console.log('after toSvgString');
   console.log(svg);
 
