@@ -1,13 +1,13 @@
 {
   "version": "0.0.4",
   "description": "Understand your transactions, and protect your assets.",
-  "proposedName": "Bitfinding Semantic Factor",
+  "proposedName": "Unblind Semantic Factor",
   "repository": {
     "type": "git",
     "url": "https://github.com/BitFinding/semantic-factor-snap.git"
   },
   "source": {
-    "shasum": "TH2TgxRBDiKZLbfNL5MxWxfjpnyZMhfDumiPFcqLfac=",
+    "shasum": "WzlqYbneN9sIYhOn9UyNCpmwTy6q2+mMXNzknwveG6o=",
     "location": {
       "npm": {
         "iconPath": "assets/icon.svg",

@@ -17204,9 +17204,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"snap@workspace:packages/snap":
+"snap-semantic-factor@workspace:packages/snap":
   version: 0.0.0-use.local
-  resolution: "snap@workspace:packages/snap"
+  resolution: "snap-semantic-factor@workspace:packages/snap"
   dependencies:
     "@jest/globals": ^29.5.0
     "@metamask/auto-changelog": ^3.4.4

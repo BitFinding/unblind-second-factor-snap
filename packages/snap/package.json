@@ -1,7 +1,7 @@
 {
   "name": "snap-semantic-factor",
   "version": "0.0.4",
-  "description": "Understand your transactions, and protect your assets with Bitfinding Semantic Factor.",
+  "description": "Understand your transactions, and protect your assets with Unblind: Semantic Factor.",
   "repository": {
     "type": "git",
     "url": "https://github.com/BitFinding/semantic-factor-snap.git"
