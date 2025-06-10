@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example",
+  "description": "See through your transaction insights and protect your assets.",
+  "proposedName": "Unblind",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "T7n+rAUCcajzwShyBwLH/EsJdQrdnD7ojmTyt2uTBQ0=",
+    "shasum": "SFYCf6RQ1y0odzpe24yHm4piqELnwrb1nvlAg/SwKIU=",
     "location": {
       "npm": {
         "iconPath": "assets/icon.svg",

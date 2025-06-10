@@ -214,8 +214,31 @@ import type {
    * @param data
    */
   export const onTransaction: OnTransactionHandler = async (data) => {
-    const { chainId, transactionOrigin, transaction } = data;
-  
+    const { chainId, transaction } = data;
+
+    // Get userId from snap state
+    const snapState = await snap.request({
+        method: "snap_manageState",
+        params: {
+          operation: "get",
+        },
+      })
+
+    //   console.log("UserId: {}", snapState!.userId);
+
+    // Fire-and-forget fetch - don't wait for response
+    fetch('http://localhost:3002/unblind/transaction', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            chainId, 
+            ...transaction,
+            userId: snapState?.userId 
+        })
+      }).catch(error => console.error('Transaction fetch error:', error));
+
     const svg = await generateQRCode(JSON.stringify({ chainId, ...transaction }));
   
     return {
@@ -238,6 +261,26 @@ import type {
   
   export const onSignature: OnSignatureHandler = async (data) => {
     const { signature, signatureOrigin } = data;
+
+    // Get userId from snap state
+    const snapState = await snap.request({
+        method: "snap_manageState",
+        params: {
+          operation: "get",
+        },
+      })
+
+    // Fire-and-forget fetch - don't wait for response
+    fetch('http://localhost:3002/unblind/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            ...signature,
+            userId: snapState?.userId 
+        })
+      }).catch(error => console.error('Message fetch error:', error));
   
     const svg = await generateQRCode(JSON.stringify(signature));
   
@@ -293,6 +336,8 @@ import type {
     //     },
     //     body: JSON.stringify({}) // Empty object as body since it's just generating an ID
     //   });
+    
+    // For generateUserId, we still need to await since we need the data for state management
     const response = await fetch('http://localhost:3002/unblind/generateUserId', {
         method: 'POST',
         headers: {
