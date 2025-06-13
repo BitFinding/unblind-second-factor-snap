@@ -6,6 +6,8 @@ import type {
   OnSignatureHandler,
   OnInstallHandler,
   OnUpdateHandler,
+  OnTransactionResponse,
+  OnSignatureResponse,
 } from '@metamask/snaps-sdk';
 import { Box, Text, Heading, Image, Copyable } from '@metamask/snaps-sdk/jsx';
 
@@ -130,12 +132,12 @@ async function generateQRCode(
 
     console.log(
         '[generateQRCode] Starting QR code generation with data:',
-        data,
+        compressedData,
     );
     console.log('[generateQRCode] Mode:', mode);
 
     try {
-        return generateQRCodeRemote(data, mode);
+        return generateQRCodeRemote(compressedData, mode);
     } catch (error) {
         const errorMessage =
             error instanceof Error ? error.message : 'Unknown error';
@@ -147,7 +149,7 @@ async function generateQRCode(
 
         // Fallback to basic QR code
         console.log('[generateQRCode] Falling back to raw QR code generation');
-        return generateQRCodeRaw(data);
+        return generateQRCodeRaw(compressedData);
     }
 }
 
@@ -247,6 +249,57 @@ const unblindLogo = `<svg width="124" height="80" viewBox="0 0 124 80" fill="non
   </defs>
   </svg>`;
 
+const showDialogUnblind = async (svg: string) => {
+  const snapState = await snap.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'get',
+    },
+  });
+
+  const userId = snapState?.userId;
+  let qrLinkAccount: string | undefined;
+  if (!userId) {
+    // If no userId, call signupUser to get userId
+    const userSignup = await signupUser();
+    qrLinkAccount = userSignup.qrCode;
+  } else {
+    const userIdStr = userId.toString();
+    // Check state of userId otherwise
+    const userState = await getUserState(userIdStr);
+    if (!userState.tgLinked) {
+      const userInfo = await getUserInfo(userIdStr);
+      qrLinkAccount = userInfo.qrCode;
+    }
+  }
+
+  console.log(`[showDialogUnblind]: UserId: ${userId}, QR Link Account: ${qrLinkAccount}`);
+  console.log(`[showDialogUnblind]: SVG: ${svg}`);
+
+  return {
+    content: (
+            <Box alignment="center">
+                <Box alignment="center" center>
+                    <Image src={unblindLogo} />
+                </Box>
+                {qrLinkAccount &&
+                 <Box>
+                   <Text>Link your account to receive Second Factor notifications</Text>
+                   <Image src={qrLinkAccount} />
+                 </Box>
+                }
+                <Text alignment="center">
+                    Scan the QR code with another device to understand your transaction
+                    at:
+                </Text>
+                <Copyable value="https://unblind.app/" />
+                <Image src={svg} />
+            </Box>
+        ),
+        severity: 'critical',
+    };
+}
+
 /**
  * On Transaction
  *
@@ -283,22 +336,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     1,
   );
 
-  return {
-    content: (
-      <Box alignment="center">
-        <Box alignment="center" center>
-          <Image src={unblindLogo} />
-        </Box>
-        <Text alignment="center">
-          Scan the QR code with another device to understand your transaction
-          at:
-        </Text>
-        <Copyable value="https://unblind.app/" />
-        <Image src={svg} />
-      </Box>
-    ),
-    severity: 'critical',
-  };
+  return (await showDialogUnblind(svg)) as OnTransactionResponse;
 };
 
 export const onSignature: OnSignatureHandler = async (data) => {
@@ -326,16 +364,9 @@ export const onSignature: OnSignatureHandler = async (data) => {
 
   const svg = await generateQRCode(JSON.stringify(signature), 1);
 
-  return {
-    content: (
-      <Box>
-        <Heading>Unblind: Sematic Factor</Heading>
-        <Image src={svg} />
-      </Box>
-    ),
-    severity: 'critical',
-  };
+  return (await showDialogUnblind(svg)) as OnSignatureResponse;
 };
+
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -370,25 +401,81 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   }
 };
 
-export const onInstall: OnInstallHandler = async () => {
-  // For generateUserId, we still need to await since we need the data for state management
-  const response = await fetch('http://localhost:3002/unblind/signup', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+type UserInfo = {
+  userId: string;
+  qrCode: string;
+  botLink: string;
+};
+
+// Add return type to signupUser
+async function signupUser(): Promise<UserInfo> {
+    const response = await fetch('http://localhost:3002/unblind/userSignup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
   });
 
   if (!response.ok) {
     throw new Error('Failed to signup user');
   }
 
+  const userInfo = await response.json();
+
+  // Save in snap
+  await snap.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'update',
+      newState: {
+        userId: userInfo.userId,
+        qrCode: userInfo.qrCode,
+        botLink: userInfo.botLink,
+      },
+    },
+  });
+
+  return userInfo;
+}
+
+async function getUserInfo(userId: string): Promise<UserInfo> {
+  const response = await fetch(`http://localhost:3002/unblind/userInfo/${userId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to get user state');
+  }
+
+  return await response.json();
+};
+
+type UserState = {
+  tgLinked: boolean;
+}
+
+async function getUserState(userId: string): Promise<UserState> {
+  const response = await fetch(`http://localhost:3002/unblind/userState/${userId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to get user state');
+  }
+  return await response.json();
+}
+
+
+export const onInstall: OnInstallHandler = async () => {
   const {
     userId,
     qrCode,
     botLink,
-  }: { userId: string; qrCode: string; botLink: string } =
-    await response.json();
+  } = await signupUser();
 
   await snap.request({
     method: 'snap_manageState',
@@ -408,6 +495,7 @@ export const onInstall: OnInstallHandler = async () => {
       type: 'alert',
       content: (
         <Box>
+          <Text>Link your account to receive Second Factor notifications</Text>
           <Image src={qrCode} />
         </Box>
       ),
