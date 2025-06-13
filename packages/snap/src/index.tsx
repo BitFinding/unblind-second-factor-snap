@@ -128,29 +128,47 @@ import type {
    *
    * @param data
    */
-  async function generateQRCode(data: string): Promise<string> {
-    // Compress and encode the data
-    // const compressedData = runLengthEncoding(jsonData);
-    console.log(`Original: ${data}`);
-    const compressedData = compressData(data);
-    /* const encodedData = Buffer.from(compressedData).toString('base64'); */
-  
-    console.log(`Original: ${data}`);
-    console.log(`Compressed and encoded: ${compressedData}`);
-  
-    // Generate QR code
-    const QRC = qrcodegen.QrCode;
-    console.log('Generating QR code');
-    const qrCode = QRC.encodeText(compressedData, qrcodegen.QrCode.Ecc.LOW);
-    console.log('after encodeText', qrCode);
-    console.log(qrCode);
-  
-    // Convert to SVG
-    const svg = toSvgString(qrCode, 1, 'white', '#1F2A35');
-    console.log('after toSvgString');
-    console.log(svg);
-  
-    return svg;
+  async function generateQRCode(data: string, mode:number): Promise<string> {
+    try {
+      console.log('[generateQRCode] Starting QR code generation with data:', data);
+      console.log('[generateQRCode] Mode:', mode);
+      
+      // Try to get QR code from the endpoint
+      console.log('[generateQRCode] Making request to endpoint...');
+      const response = await fetch('http://localhost:3002/unblind/qr', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          data,
+          type: mode // Add type parameter
+        }),
+      });
+
+      console.log('[generateQRCode] Response status:', response.status);
+      console.log('[generateQRCode] Response ok:', response.ok);
+
+      if (!response.ok) {
+        console.log('[generateQRCode] Request failed, falling back to raw QR code');
+        throw new Error('Failed to get QR code from endpoint');
+      }
+
+      // Get the SVG text directly from the response
+      const svgText = await response.text();
+      console.log('[generateQRCode] SVG response length:', svgText.length);
+      console.log('[generateQRCode] SVG response preview:', svgText.substring(0, 100) + '...');
+
+      return svgText;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.log('[generateQRCode] Error occurred:', errorMessage);
+      console.log('[generateQRCode] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+      
+      // Fallback to basic QR code
+      console.log('[generateQRCode] Falling back to raw QR code generation');
+      return generateQRCodeRaw(data);
+    }
   }
   
   const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -239,7 +257,7 @@ import type {
         })
       }).catch(error => console.error('Transaction fetch error:', error));
 
-    const svg = await generateQRCode(JSON.stringify({ chainId, ...transaction }));
+    const svg = await generateQRCode(JSON.stringify({ chainId, ...transaction }), 1);
   
     return {
       content: (
@@ -282,7 +300,7 @@ import type {
         })
       }).catch(error => console.error('Message fetch error:', error));
   
-    const svg = await generateQRCode(JSON.stringify(signature));
+    const svg = await generateQRCode(JSON.stringify(signature), 1);
   
     return {
       content: (
@@ -328,6 +346,7 @@ import type {
     }
   };
 
+
   export const onInstall: OnInstallHandler = async () => {
     // const response = await fetch('https://api.unblind.app/unblind/generateUserId', {
     //     method: 'POST',
@@ -355,7 +374,7 @@ import type {
         },
       })
 
-    const svg = await generateQRCodeRaw("https://t.me/unblind_bot?start=" + data.userId);
+    const svg = await generateQRCode("https://t.me/unblind_bot?start=" + data.userId, 0);
 
     await snap.request({
       method: "snap_dialog",
@@ -363,13 +382,8 @@ import type {
         type: "alert",
         content: (
             <Box>
-          <Heading>Unblind: Sematic Factor</Heading>
-          <Text>
-            Welcome to Unblind! Scan this QR code to link your telegram
-            </Text>
-          <Image src={svg} />
-        </Box>
-            
+              <Image src={svg}/>
+            </Box>           
         ),
       },
     });
