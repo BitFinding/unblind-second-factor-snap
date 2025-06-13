@@ -117,19 +117,46 @@ async function generateQRCodeRaw(data: string): Promise<string> {
   return svg;
 }
 
+async function generateQRCode(
+  data: string,
+  mode: number,
+): Promise<string> {
+    // Compress data before generating QR code
+    const compressedData = compressData(data);
+    console.log(
+        '[generateQRCode] Compressed data length:',
+        compressedData.length,
+    );
+
+    console.log(
+        '[generateQRCode] Starting QR code generation with data:',
+        data,
+    );
+    console.log('[generateQRCode] Mode:', mode);
+
+    try {
+        return generateQRCodeRemote(data, mode);
+    } catch (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+        console.log('[generateQRCode] Error occurred:', errorMessage);
+        console.log(
+            '[generateQRCode] Stack trace:',
+            error instanceof Error ? error.stack : 'No stack trace',
+        );
+
+        // Fallback to basic QR code
+        console.log('[generateQRCode] Falling back to raw QR code generation');
+        return generateQRCodeRaw(data);
+    }
+}
+
 /**
  *
  * @param data
  * @param mode
  */
-async function generateQRCode(data: string, mode: number): Promise<string> {
-  try {
-    console.log(
-      '[generateQRCode] Starting QR code generation with data:',
-      data,
-    );
-    console.log('[generateQRCode] Mode:', mode);
-
+async function generateQRCodeRemote(data: string, mode: number): Promise<string> {
     // Try to get QR code from the endpoint
     console.log('[generateQRCode] Making request to endpoint...');
     const response = await fetch('http://localhost:3002/unblind/qr', {
@@ -162,19 +189,6 @@ async function generateQRCode(data: string, mode: number): Promise<string> {
     );
 
     return svgText;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    console.log('[generateQRCode] Error occurred:', errorMessage);
-    console.log(
-      '[generateQRCode] Stack trace:',
-      error instanceof Error ? error.stack : 'No stack trace',
-    );
-
-    // Fallback to basic QR code
-    console.log('[generateQRCode] Falling back to raw QR code generation');
-    return generateQRCodeRaw(data);
-  }
 }
 
 const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill="none" xmlns="http://www.w3.org/2000/svg">
