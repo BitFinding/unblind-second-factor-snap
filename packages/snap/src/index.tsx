@@ -359,7 +359,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 export const onInstall: OnInstallHandler = async () => {
   // For generateUserId, we still need to await since we need the data for state management
   const response = await fetch('http://localhost:3002/unblind/signup', {
-    method: 'GET',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
