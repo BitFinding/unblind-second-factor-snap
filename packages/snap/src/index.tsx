@@ -1,177 +1,183 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
+
 import type {
-    OnRpcRequestHandler,
-    OnTransactionHandler,
-    OnSignatureHandler,
-    OnInstallHandler,
-    OnUpdateHandler,
-  } from '@metamask/snaps-sdk';
-  import {
-    Box,
-    Text,
-    Heading,
-    Image,
-    Copyable,
-  } from '@metamask/snaps-sdk/jsx';
-  
-  import { deflate, DEFAULT_LEVEL } from './deflate.js';
-  import { qrcodegen } from './qrcodegen.js';
-  
-  declare global {
-    interface Window {
-      ethereum: any;
-    }
+  OnRpcRequestHandler,
+  OnTransactionHandler,
+  OnSignatureHandler,
+  OnInstallHandler,
+  OnUpdateHandler,
+} from '@metamask/snaps-sdk';
+import { Box, Text, Heading, Image, Copyable } from '@metamask/snaps-sdk/jsx';
+
+import { deflate, DEFAULT_LEVEL } from './deflate.js';
+import { qrcodegen } from './qrcodegen.js';
+
+declare global {
+  interface Window {
+    ethereum: any;
   }
-  
-  // Returns a string of SVG code for an image depicting the given QR Code, with the given number
-  // of border modules. The string always uses Unix newlines (\n), regardless of the platform.
-  /**
-   *
-   * @param qr
-   * @param border
-   * @param lightColor
-   * @param darkColor
-   */
-  function toSvgString(
-    qr: qrcodegen.QrCode,
-    border: number,
-    lightColor: string,
-    darkColor: string,
-  ): string {
-    if (border < 0) {
-      throw new RangeError('Border must be non-negative');
-    }
-    const parts: string[] = [];
-    for (let y = 0; y < qr.size; y++) {
-      for (let x = 0; x < qr.size; x++) {
-        if (qr.getModule(x, y)) {
-          parts.push(`M${x + border},${y + border}h1v1h-1z`);
-        }
+}
+
+// Returns a string of SVG code for an image depicting the given QR Code, with the given number
+// of border modules. The string always uses Unix newlines (\n), regardless of the platform.
+/**
+ *
+ * @param qr
+ * @param border
+ * @param lightColor
+ * @param darkColor
+ */
+function toSvgString(
+  qr: qrcodegen.QrCode,
+  border: number,
+  lightColor: string,
+  darkColor: string,
+): string {
+  if (border < 0) {
+    throw new RangeError('Border must be non-negative');
+  }
+  const parts: string[] = [];
+  for (let y = 0; y < qr.size; y++) {
+    for (let x = 0; x < qr.size; x++) {
+      if (qr.getModule(x, y)) {
+        parts.push(`M${x + border},${y + border}h1v1h-1z`);
       }
     }
-    return `<?xml version="1.0" encoding="UTF-8"?>
+  }
+  return `<?xml version="1.0" encoding="UTF-8"?>
   <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ${
-      qr.size + border * 2
-    } ${qr.size + border * 2}" stroke="none">
+    qr.size + border * 2
+  } ${qr.size + border * 2}" stroke="none">
     <rect width="100%" height="100%" fill="${lightColor}"/>
     <path d="${parts.join(' ')}" fill="${darkColor}"/>
   </svg>
   `;
-  }
-  
-  /**
-   *
-   * @param data
-   */
-  function runLengthEncoding(data: string): string {
-    let result = '';
-    let count = 1;
-  
-    for (let i = 0; i < data.length; i++) {
-      let j = i + 1;
-      while (data[i] === data[j]) {
-        count++;
-        if (count === 9) {
-          j++;
-          break;
-        } else {
-          j++;
-        }
+}
+
+/**
+ *
+ * @param data
+ */
+function runLengthEncoding(data: string): string {
+  let result = '';
+  let count = 1;
+
+  for (let i = 0; i < data.length; i++) {
+    let j = i + 1;
+    while (data[i] === data[j]) {
+      count++;
+      if (count === 9) {
+        j++;
+        break;
+      } else {
+        j++;
       }
-      result = result.concat(`${count}${data[i]}`);
-      count = 1;
-      i = j - 1;
     }
-    return result;
+    result = result.concat(`${count}${data[i]}`);
+    count = 1;
+    i = j - 1;
   }
-  
-  /**
-   * @description Compress data
-   * @param data
-   */
-  function compressData(data: string): string {
-    // Convert string to byte array
-    const byteArray = new TextEncoder().encode(data);
-  
-    // Convert Uint8Array to regular array for deflate
-    const array = Array.from(byteArray);
-  
-    // Compress using deflate
-    const compressed = deflate(array, DEFAULT_LEVEL);
-  
-    // Convert compressed array to Uint8Array for base64 encoding
-    const compressedArray = new Uint8Array(compressed);
-  
-    // Convert to base64
-    return btoa(String.fromCharCode.apply(null, compressedArray));
-  }
+  return result;
+}
 
-  /**
-   *
-   * @param data
-   */
-  async function generateQRCodeRaw(data: string): Promise<string> {
-    // Generate QR code
-    const QRC = qrcodegen.QrCode;
-    const qrCode = QRC.encodeText(data, qrcodegen.QrCode.Ecc.LOW);
-  
-    // Convert to SVG
-    const svg = toSvgString(qrCode, 1, 'white', '#1F2A35');
-  
-    return svg;
-  }
-  
-  /**
-   *
-   * @param data
-   */
-  async function generateQRCode(data: string, mode:number): Promise<string> {
-    try {
-      console.log('[generateQRCode] Starting QR code generation with data:', data);
-      console.log('[generateQRCode] Mode:', mode);
-      
-      // Try to get QR code from the endpoint
-      console.log('[generateQRCode] Making request to endpoint...');
-      const response = await fetch('http://localhost:3002/unblind/qr', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          data,
-          type: mode // Add type parameter
-        }),
-      });
+/**
+ * @description Compress data
+ * @param data
+ */
+function compressData(data: string): string {
+  // Convert string to byte array
+  const byteArray = new TextEncoder().encode(data);
 
-      console.log('[generateQRCode] Response status:', response.status);
-      console.log('[generateQRCode] Response ok:', response.ok);
+  // Convert Uint8Array to regular array for deflate
+  const array = Array.from(byteArray);
 
-      if (!response.ok) {
-        console.log('[generateQRCode] Request failed, falling back to raw QR code');
-        throw new Error('Failed to get QR code from endpoint');
-      }
+  // Compress using deflate
+  const compressed = deflate(array, DEFAULT_LEVEL);
 
-      // Get the SVG text directly from the response
-      const svgText = await response.text();
-      console.log('[generateQRCode] SVG response length:', svgText.length);
-      console.log('[generateQRCode] SVG response preview:', svgText.substring(0, 100) + '...');
+  // Convert compressed array to Uint8Array for base64 encoding
+  const compressedArray = new Uint8Array(compressed);
 
-      return svgText;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.log('[generateQRCode] Error occurred:', errorMessage);
-      console.log('[generateQRCode] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
-      
-      // Fallback to basic QR code
-      console.log('[generateQRCode] Falling back to raw QR code generation');
-      return generateQRCodeRaw(data);
+  // Convert to base64
+  return btoa(String.fromCharCode.apply(null, compressedArray));
+}
+
+/**
+ *
+ * @param data
+ */
+async function generateQRCodeRaw(data: string): Promise<string> {
+  // Generate QR code
+  const QRC = qrcodegen.QrCode;
+  const qrCode = QRC.encodeText(data, qrcodegen.QrCode.Ecc.LOW);
+
+  // Convert to SVG
+  const svg = toSvgString(qrCode, 1, 'white', '#1F2A35');
+
+  return svg;
+}
+
+/**
+ *
+ * @param data
+ * @param mode
+ */
+async function generateQRCode(data: string, mode: number): Promise<string> {
+  try {
+    console.log(
+      '[generateQRCode] Starting QR code generation with data:',
+      data,
+    );
+    console.log('[generateQRCode] Mode:', mode);
+
+    // Try to get QR code from the endpoint
+    console.log('[generateQRCode] Making request to endpoint...');
+    const response = await fetch('http://localhost:3002/unblind/qr', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        data,
+        type: mode, // Add type parameter
+      }),
+    });
+
+    console.log('[generateQRCode] Response status:', response.status);
+    console.log('[generateQRCode] Response ok:', response.ok);
+
+    if (!response.ok) {
+      console.log(
+        '[generateQRCode] Request failed, falling back to raw QR code',
+      );
+      throw new Error('Failed to get QR code from endpoint');
     }
+
+    // Get the SVG text directly from the response
+    const svgText = await response.text();
+    console.log('[generateQRCode] SVG response length:', svgText.length);
+    console.log(
+      '[generateQRCode] SVG response preview:',
+      `${svgText.substring(0, 100)}...`,
+    );
+
+    return svgText;
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.log('[generateQRCode] Error occurred:', errorMessage);
+    console.log(
+      '[generateQRCode] Stack trace:',
+      error instanceof Error ? error.stack : 'No stack trace',
+    );
+
+    // Fallback to basic QR code
+    console.log('[generateQRCode] Falling back to raw QR code generation');
+    return generateQRCodeRaw(data);
   }
-  
-  const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+}
+
+const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M124 51H0V80H124V51Z" fill="#1F2A35"/>
   <mask id="mask0_959_905" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="6" y="0" width="113" height="52">
   <rect x="6" width="113" height="51.5189" fill="white"/>
@@ -216,8 +222,8 @@ import type {
   <path d="M15.8807 57.5455H20.0909V68.804C20.0909 70.1051 19.7813 71.2386 19.1619 72.2045C18.5426 73.1648 17.679 73.9091 16.571 74.4375C15.4631 74.9602 14.1761 75.2216 12.7102 75.2216C11.2273 75.2216 9.93182 74.9602 8.82386 74.4375C7.71591 73.9091 6.85511 73.1648 6.24148 72.2045C5.62784 71.2386 5.32102 70.1051 5.32102 68.804V57.5455H9.53977V68.4375C9.53977 69.0398 9.67045 69.5767 9.93182 70.0483C10.1989 70.5199 10.571 70.8892 11.0483 71.1562C11.5256 71.4233 12.0795 71.5568 12.7102 71.5568C13.3409 71.5568 13.892 71.4233 14.3636 71.1562C14.8409 70.8892 15.2131 70.5199 15.4801 70.0483C15.7472 69.5767 15.8807 69.0398 15.8807 68.4375V57.5455ZM39.2702 57.5455V75H35.6907L28.7446 64.9261H28.6338V75H24.4151V57.5455H28.0458L34.9151 67.6023H35.06V57.5455H39.2702ZM43.6029 75V57.5455H50.8813C52.1881 57.5455 53.2819 57.7301 54.1626 58.0994C55.0489 58.4687 55.7137 58.9858 56.1569 59.6506C56.6057 60.3153 56.8302 61.0852 56.8302 61.9602C56.8302 62.625 56.691 63.2188 56.4126 63.7415C56.1341 64.2585 55.7506 64.6875 55.262 65.0284C54.7734 65.3693 54.208 65.608 53.566 65.7443V65.9148C54.2705 65.9489 54.9211 66.1392 55.5177 66.4858C56.1199 66.8324 56.6029 67.3153 56.9665 67.9347C57.3302 68.5483 57.512 69.2756 57.512 70.1165C57.512 71.054 57.2734 71.892 56.7961 72.6307C56.3188 73.3636 55.6285 73.9432 54.7251 74.3693C53.8216 74.7898 52.7251 75 51.4353 75H43.6029ZM47.8216 71.5994H50.4296C51.3444 71.5994 52.0177 71.4261 52.4495 71.0795C52.887 70.733 53.1057 70.25 53.1057 69.6307C53.1057 69.1818 53.0006 68.7955 52.7904 68.4716C52.5802 68.142 52.2819 67.8892 51.8955 67.7131C51.5091 67.5312 51.0461 67.4403 50.5063 67.4403H47.8216V71.5994ZM47.8216 64.7216H50.1569C50.6171 64.7216 51.0262 64.6449 51.3841 64.4915C51.7421 64.3381 52.0205 64.1165 52.2194 63.8267C52.4239 63.5369 52.5262 63.1875 52.5262 62.7784C52.5262 62.1932 52.3188 61.733 51.904 61.3977C51.4893 61.0625 50.9296 60.8949 50.2251 60.8949H47.8216V64.7216ZM61.2204 75V57.5455H65.4391V71.5739H72.7005V75H61.2204ZM80.7832 57.5455V75H76.5645V57.5455H80.7832ZM99.9668 57.5455V75H96.3872L89.4412 64.9261H89.3304V75H85.1116V57.5455H88.7423L95.6116 67.6023H95.7565V57.5455H99.9668ZM110.751 75H104.299V57.5455H110.743C112.521 57.5455 114.052 57.8949 115.336 58.5938C116.626 59.2869 117.62 60.2869 118.319 61.5938C119.018 62.8949 119.368 64.4517 119.368 66.2642C119.368 68.0824 119.018 69.6449 118.319 70.9517C117.626 72.2585 116.635 73.2614 115.345 73.9602C114.055 74.6534 112.524 75 110.751 75ZM108.518 71.4034H110.589C111.567 71.4034 112.393 71.2386 113.069 70.9091C113.751 70.5739 114.265 70.0312 114.612 69.2812C114.964 68.5256 115.14 67.5199 115.14 66.2642C115.14 65.0085 114.964 64.0085 114.612 63.2642C114.26 62.5142 113.74 61.9744 113.052 61.6449C112.37 61.3097 111.53 61.142 110.53 61.142H108.518V71.4034Z" fill="#EF576E"/>
   </svg>
   `;
-  
-  const unblindLogo = `<svg width="124" height="80" viewBox="0 0 124 80" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+
+const unblindLogo = `<svg width="124" height="80" viewBox="0 0 124 80" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <rect width="124" height="80" fill="url(#pattern0_960_2249)"/>
   <defs>
   <pattern id="pattern0_960_2249" patternContentUnits="objectBoundingBox" width="1" height="1">
@@ -226,165 +232,171 @@ import type {
   <image id="image0_960_2249" width="248" height="160" preserveAspectRatio="none" xlink:href="data:image/png;base64,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"/>
   </defs>
   </svg>`;
-  
-  /**
-   * On Transaction
-   * @param data
-   */
-  export const onTransaction: OnTransactionHandler = async (data) => {
-    const { chainId, transaction } = data;
 
-    // Get userId from snap state
-    const snapState = await snap.request({
-        method: "snap_manageState",
-        params: {
-          operation: "get",
-        },
-      })
+/**
+ * On Transaction
+ *
+ * @param data
+ */
+export const onTransaction: OnTransactionHandler = async (data) => {
+  const { chainId, transaction } = data;
 
-    //   console.log("UserId: {}", snapState!.userId);
+  // Get userId from snap state
+  const snapState = await snap.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'get',
+    },
+  });
 
-    // Fire-and-forget fetch - don't wait for response
-    fetch('http://localhost:3002/unblind/transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-            chainId, 
-            ...transaction,
-            userId: snapState?.userId 
-        })
-      }).catch(error => console.error('Transaction fetch error:', error));
+  //   console.log("UserId: {}", snapState!.userId);
 
-    const svg = await generateQRCode(JSON.stringify({ chainId, ...transaction }), 1);
-  
-    return {
-      content: (
-        <Box alignment="center">
-          <Box alignment="center" center>
-            <Image src={unblindLogo} />
-          </Box>
-          <Text alignment="center">
-            Scan the QR code with another device to understand your transaction
-            at:
-          </Text>
-          <Copyable value="https://unblind.app/" />
-          <Image src={svg} />
+  // Fire-and-forget fetch - don't wait for response
+  fetch('http://localhost:3002/unblind/transaction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      chainId,
+      ...transaction,
+      userId: snapState?.userId,
+    }),
+  }).catch((error) => console.error('Transaction fetch error:', error));
+
+  const svg = await generateQRCode(
+    JSON.stringify({ chainId, ...transaction }),
+    1,
+  );
+
+  return {
+    content: (
+      <Box alignment="center">
+        <Box alignment="center" center>
+          <Image src={unblindLogo} />
         </Box>
-      ),
-      severity: 'critical',
-    };
+        <Text alignment="center">
+          Scan the QR code with another device to understand your transaction
+          at:
+        </Text>
+        <Copyable value="https://unblind.app/" />
+        <Image src={svg} />
+      </Box>
+    ),
+    severity: 'critical',
   };
-  
-  export const onSignature: OnSignatureHandler = async (data) => {
-    const { signature, signatureOrigin } = data;
+};
 
-    // Get userId from snap state
-    const snapState = await snap.request({
-        method: "snap_manageState",
+export const onSignature: OnSignatureHandler = async (data) => {
+  const { signature, signatureOrigin } = data;
+
+  // Get userId from snap state
+  const snapState = await snap.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'get',
+    },
+  });
+
+  // Fire-and-forget fetch - don't wait for response
+  fetch('http://localhost:3002/unblind/message', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...signature,
+      userId: snapState?.userId,
+    }),
+  }).catch((error) => console.error('Message fetch error:', error));
+
+  const svg = await generateQRCode(JSON.stringify(signature), 1);
+
+  return {
+    content: (
+      <Box>
+        <Heading>Unblind: Sematic Factor</Heading>
+        <Image src={svg} />
+      </Box>
+    ),
+    severity: 'critical',
+  };
+};
+
+/**
+ * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
+ *
+ * @param args - The request handler args as object.
+ * @param args.origin - The origin of the request, e.g., the website that
+ * invoked the snap.
+ * @param args.request - A validated JSON-RPC request object.
+ * @returns The result of `snap_dialog`.
+ * @throws If the request method is not valid for this snap.
+ */
+export const onRpcRequest: OnRpcRequestHandler = async ({
+  origin,
+  request,
+}) => {
+  switch (request.method) {
+    case 'eth_sendTransaction':
+      return await snap.request({
+        method: 'snap_dialog',
         params: {
-          operation: "get",
+          type: 'alert',
+          content: (
+            <Box>
+              <Heading>Unblind Alert</Heading>
+              <Text>Something happened in the system.</Text>
+            </Box>
+          ),
         },
-      })
+      });
+    default:
+      throw new Error('Method not found.');
+  }
+};
 
-    // Fire-and-forget fetch - don't wait for response
-    fetch('http://localhost:3002/unblind/message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-            ...signature,
-            userId: snapState?.userId 
-        })
-      }).catch(error => console.error('Message fetch error:', error));
-  
-    const svg = await generateQRCode(JSON.stringify(signature), 1);
-  
-    return {
+export const onInstall: OnInstallHandler = async () => {
+  // For generateUserId, we still need to await since we need the data for state management
+  const response = await fetch('http://localhost:3002/unblind/signup', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to signup user');
+  }
+
+  const {
+    userId,
+    qrCode,
+    botLink,
+  }: { userId: string; qrCode: string; botLink: string } =
+    await response.json();
+
+  await snap.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'update',
+      newState: {
+        userId,
+        qrCode,
+        botLink,
+      },
+    },
+  });
+
+  await snap.request({
+    method: 'snap_dialog',
+    params: {
+      type: 'alert',
       content: (
         <Box>
-          <Heading>Unblind: Sematic Factor</Heading>
-          <Image src={svg} />
+          <Image src={qrCode} />
         </Box>
       ),
-      severity: 'critical',
-    };
-  };
-  
-  /**
-   * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
-   *
-   * @param args - The request handler args as object.
-   * @param args.origin - The origin of the request, e.g., the website that
-   * invoked the snap.
-   * @param args.request - A validated JSON-RPC request object.
-   * @returns The result of `snap_dialog`.
-   * @throws If the request method is not valid for this snap.
-   */
-  export const onRpcRequest: OnRpcRequestHandler = async ({
-    origin,
-    request,
-  }) => {
-    switch (request.method) {
-      case 'eth_sendTransaction':
-        return await snap.request({
-          method: 'snap_dialog',
-          params: {
-            type: 'alert',
-            content: (
-              <Box>
-                <Heading>Unblind Alert</Heading>
-                <Text>Something happened in the system.</Text>
-              </Box>
-            ),
-          },
-        });
-      default:
-        throw new Error('Method not found.');
-    }
-  };
-
-
-  export const onInstall: OnInstallHandler = async () => {
-    // const response = await fetch('https://api.unblind.app/unblind/generateUserId', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({}) // Empty object as body since it's just generating an ID
-    //   });
-    
-    // For generateUserId, we still need to await since we need the data for state management
-    const response = await fetch('http://localhost:3002/unblind/generateUserId', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}) // Empty object as body since it's just generating an ID
-      });
-    const data = await response.json();
-
-    await snap.request({
-        method: "snap_manageState",
-        params: {
-          operation: "update",
-          newState: { userId: data.userId },
-        },
-      })
-
-    const svg = await generateQRCode("https://t.me/unblind_bot?start=" + data.userId, 0);
-
-    await snap.request({
-      method: "snap_dialog",
-      params: {
-        type: "alert",
-        content: (
-            <Box>
-              <Image src={svg}/>
-            </Box>           
-        ),
-      },
-    });
-  };
+    },
+  });
+};
