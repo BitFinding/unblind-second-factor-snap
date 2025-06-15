@@ -282,7 +282,7 @@ const showDialogUnblind = async (svg: string) => {
                 <Box alignment="center" center>
                     <Image src={unblindLogo} />
                 </Box>
-                {qrLinkAccount &&
+                {qrLinkAccount !== undefined &&
                  <Box>
                    <Text>Link your account to receive Second Factor notifications</Text>
                    <Image src={qrLinkAccount} />
