@@ -275,6 +275,9 @@ const showDialogUnblind = async (svg: string) => {
 
   console.log(`[showDialogUnblind]: UserId: ${userId}, QR Link Account: ${qrLinkAccount}`);
   console.log(`[showDialogUnblind]: SVG: ${svg}`);
+//   <Text alignment="center">
+//   Scan the QR code to review your transaction:
+// </Text>
 
   return {
     content: (
@@ -284,16 +287,12 @@ const showDialogUnblind = async (svg: string) => {
                 </Box>
                 {qrLinkAccount !== undefined &&
                  <Box>
-                   <Text>Link your account to receive Second Factor notifications</Text>
+                   {/* <Text>Link your account to receive Second Factor notifications</Text> */}
                    <Image src={qrLinkAccount} />
                  </Box>
                 }
-                <Text alignment="center">
-                    Scan the QR code with another device to understand your transaction
-                    at:
-                </Text>
-                <Copyable value="https://unblind.app/" />
                 <Image src={svg} />
+                <Copyable value="https://unblind.app/" />
             </Box>
         ),
         severity: 'critical',
@@ -301,7 +300,6 @@ const showDialogUnblind = async (svg: string) => {
 
   }
 
-}
 
 /**
  * On Transaction
@@ -338,7 +336,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     JSON.stringify({ chainId, ...transaction }),
     1,
   );
-
+  
   return (await showDialogUnblind(svg)) as OnTransactionResponse;
 };
 
@@ -465,7 +463,7 @@ export const onInstall: OnInstallHandler = async () => {
       type: 'alert',
       content: (
         <Box>
-          <Text>Link your account to receive Second Factor notifications</Text>
+          {/* <Text>Link your account to receive Second Factor notifications</Text> */}
           <Image src={qrCode} />
         </Box>
       ),
