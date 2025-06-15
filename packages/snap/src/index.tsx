@@ -8,8 +8,9 @@ import type {
   OnUpdateHandler,
   OnTransactionResponse,
   OnSignatureResponse,
+  OnHomePageHandler,
 } from '@metamask/snaps-sdk';
-import { Box, Text, Heading, Image, Copyable } from '@metamask/snaps-sdk/jsx';
+import { Box, Text, Heading, Image, Copyable, Link, Banner } from '@metamask/snaps-sdk/jsx';
 
 import { deflate, DEFAULT_LEVEL } from './deflate.js';
 import { qrcodegen } from './qrcodegen.js';
@@ -278,19 +279,20 @@ const showDialogUnblind = async (svg: string) => {
 //   <Text alignment="center">
 //   Scan the QR code to review your transaction:
 // </Text>
+// <Box alignment="center" center>
+// <Image src={unblindLogo} />
+// </Box>
 
   return {
     content: (
             <Box alignment="center">
-                <Box alignment="center" center>
-                    <Image src={unblindLogo} />
-                </Box>
                 {qrLinkAccount !== undefined &&
-                 <Box>
-                   {/* <Text>Link your account to receive Second Factor notifications</Text> */}
-                   <Image src={qrLinkAccount} />
-                 </Box>
-                }
+                <Box alignment="center">
+                <Banner title="Warning" severity="info">
+                  <Link href="metamask://snap/local:http://localhost:8080/home">Connect your telegram</Link>
+                </Banner>
+                </Box>
+                                }
                 <Image src={svg} />
                 <Copyable value="https://unblind.app/" />
             </Box>
@@ -469,4 +471,54 @@ export const onInstall: OnInstallHandler = async () => {
       ),
     },
   });
+};
+
+
+
+export const onHomePage: OnHomePageHandler = async () => {
+  const snapState = await snap.request({
+    method: 'snap_manageState',
+    params: {
+      operation: 'get',
+    },
+  });
+
+  const userId = snapState?.userId;
+  let qrLinkAccount: string | undefined;
+  if (!userId) {
+    // If no userId, call signupUser to get userId
+    const userSignup = await signupUser();
+    qrLinkAccount = userSignup.qrCode;
+  } else {
+    const userIdStr = userId.toString();
+    // Check state of userId otherwise
+    const userState = await getUserState(userIdStr);
+    if (!userState.tgLinked) {
+      const userInfo = await getUserInfo(userIdStr);
+      qrLinkAccount = userInfo.qrCode;
+    }
+  }
+
+
+  return {
+    content: (
+      <Box>
+        <Heading>Welcome to Unblind</Heading>
+         <Box alignment="center" center>
+         <Image src={unblindLogo} />
+        </Box>
+        <Text>
+          Scan QR codes to understand your transactions and signatures.
+        </Text>
+        <Text>
+          Visit <Link href="https://unblind.app">unblind.app</Link> to learn more.
+        </Text>
+        {qrLinkAccount !== undefined &&
+                 <Box>
+              <Image src={qrLinkAccount} />
+          </Box>
+          }
+      </Box>
+    ),
+  };
 };
