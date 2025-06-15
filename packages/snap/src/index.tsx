@@ -298,6 +298,9 @@ const showDialogUnblind = async (svg: string) => {
         ),
         severity: 'critical',
     };
+
+  }
+
 }
 
 /**
