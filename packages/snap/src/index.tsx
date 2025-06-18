@@ -24,6 +24,32 @@ import { qrcodegen } from './qrcodegen.js';
 
 import { unblindLogo } from './assets';
 
+/**
+ * Makes an API request to the Unblind backend
+ * @param endpoint The API endpoint (without the base URL)
+ * @param method HTTP method to use
+ * @param body Optional request body
+ * @param responseType Type of response expected ('json' or 'text')
+ * @returns The response data
+ */
+async function apiRequest(endpoint: string, method: string, body?: object, responseType: 'json' | 'text' = 'json') {
+  const url = `http://localhost:3002/unblind/${endpoint}`;
+  const options: RequestInit = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+  if (body !== undefined) {
+    options.body = JSON.stringify(body);
+  }
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.statusText}`);
+  }
+  return responseType === 'text' ? response.text() : response.json();
+}
+
 declare global {
   interface Window {
     ethereum: any;
@@ -125,24 +151,7 @@ async function generateQRCodeRemote(
   mode: number,
 ): Promise<string> {
   // Try to get QR code from the endpoint
-  const response = await fetch('http://localhost:3002/unblind/qr', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      data,
-      type: mode, // Add type parameter
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to get QR code from endpoint');
-  }
-
-  // Get the SVG text directly from the response
-  const svgText = await response.text();
-
+  const svgText = await apiRequest('qr', 'POST', { data, type: mode }, 'text');
   return svgText;
 }
 
@@ -232,16 +241,10 @@ export const onTransaction: OnTransactionHandler = async (data) => {
   });
 
   // Fire-and-forget fetch - don't wait for response
-  fetch('http://localhost:3002/unblind/transaction', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      chainId,
-      ...transaction,
-      userId: snapState?.userId,
-    }),
+  apiRequest('transaction', 'POST', {
+    chainId,
+    ...transaction,
+    userId: snapState?.userId,
   }).catch(() => {});
 
   const svg = await generateQRCode(
@@ -269,15 +272,9 @@ export const onSignature: OnSignatureHandler = async (data) => {
   });
 
   // Fire-and-forget fetch - don't wait for response
-  fetch('http://localhost:3002/unblind/message', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      ...signature,
-      userId: snapState?.userId,
-    }),
+  apiRequest('message', 'POST', {
+    ...signature,
+    userId: snapState?.userId,
   }).catch(() => {});
 
   const svg = await generateQRCode(JSON.stringify(signature), 1);
@@ -295,18 +292,7 @@ type UserInfo = {
 
 // Add return type to signupUser
 async function signupUser(): Promise<UserInfo> {
-  const response = await fetch('http://localhost:3002/unblind/userSignup', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to signup user');
-  }
-
-  const userInfo = await response.json();
+  const userInfo = await apiRequest('userSignup', 'POST');
 
   // Save in snap
   await snap.request({
@@ -325,56 +311,16 @@ async function signupUser(): Promise<UserInfo> {
 }
 
 async function getUserInfo(userId: string): Promise<UserInfo> {
-  const response = await fetch(
-    `http://localhost:3002/unblind/userInfo/${userId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
-  if (!response.ok) {
-    throw new Error('Failed to get user state');
-  }
-
-  return await response.json();
+  return await apiRequest(`userInfo/${userId}`, 'GET');
 }
 
 async function getMessageHash(message: any): Promise<string> {
-  const response = await fetch('http://localhost:3002/unblind/messageHash', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ message }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to get message hash');
-  }
-
-  let json = await response.json();
+  const json = await apiRequest('messageHash', 'POST', { message });
   return json.hash;
 }
 
 async function getTransactionHash(transaction: any): Promise<string> {
-  const response = await fetch(
-    'http://localhost:3002/unblind/transactionHash',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(transaction),
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error('Failed to get transaction hash');
-  }
-
-  let json = await response.json();
+  const json = await apiRequest('transactionHash', 'POST', transaction);
   return json.hash;
 }
 
@@ -383,19 +329,7 @@ type UserState = {
 };
 
 async function getUserState(userId: string): Promise<UserState> {
-  const response = await fetch(
-    `http://localhost:3002/unblind/userState/${userId}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    },
-  );
-  if (!response.ok) {
-    throw new Error('Failed to get user state');
-  }
-  return await response.json();
+  return await apiRequest(`userState/${userId}`, 'GET');
 }
 
 export const onInstall: OnInstallHandler = async () => {
