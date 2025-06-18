@@ -11,7 +11,7 @@ import {
   type OnHomePageHandler,
   SeverityLevel,
 } from '@metamask/snaps-sdk';
-import { Box, Text, Heading, Image, Copyable, Link, Banner, Dropdown, Skeleton, Row, Address, Tooltip, Icon, Section } from '@metamask/snaps-sdk/jsx';
+import { Box, Text, Heading, Image, Copyable, Link, Banner, Dropdown, Skeleton, Row, Address, Tooltip, Icon, Section, Bold, Divider } from '@metamask/snaps-sdk/jsx';
 
 import { deflate, DEFAULT_LEVEL } from './deflate.js';
 import { qrcodegen } from './qrcodegen.js';
@@ -251,7 +251,7 @@ const unblindLogo = `<svg width="124" height="80" viewBox="0 0 124 80" fill="non
   </defs>
   </svg>`;
 
-const showDialogUnblind = async (svg: string) => {
+const showDialogUnblind = async (svg: string, hash: string) => {
   const snapState = await snap.request({
     method: 'snap_manageState',
     params: {
@@ -284,27 +284,38 @@ const showDialogUnblind = async (svg: string) => {
 // <Image src={unblindLogo} />
 // </Box>
 
+  // Split hash in half into hash1 and hash2
+  const hash1 = hash.slice(0, hash.length / 2);
+  const hash2 = hash.slice(hash.length / 2);
+
   return {
     content: (
-            <Box alignment="center">
-                {qrLinkAccount !== undefined &&
-                <Box alignment="center">
-                <Banner title="Warning" severity="info">
-                <Link href="metamask://snap/local:http://localhost:8080/home">Connect your telegram</Link>
-                </Banner>
-                </Box>
-                }
+          <Box alignment="center">
+              {qrLinkAccount !== undefined &&
+                  <Box alignment="center">
+                      <Banner title="" severity="warning">
+                          <Link href="metamask://snap/local:http://localhost:8080/home">Connect your telegram</Link>
+                      </Banner>
+                  </Box>
+              }
 
-<Box direction="horizontal">
-<Icon name="scan-barcode" ></Icon><Heading>Scan with:</Heading>
-</Box>
+              <Box alignment='center'>
+                  <Text alignment='center'>{hash1}</Text>
+                  <Text alignment='center'>{hash2}</Text>
+              </Box>
+      <Divider />
+              <Box direction="horizontal">
+                  {/* <Icon name="qr-code" ></Icon> */}
+                  {/* <Heading>Scan the QR code to understand your transaction with:</Heading> */}
+                  <Text>Scan the QR code to understand your transaction with:</Text>
+              </Box>
 
-          <Copyable value="https://unblind.app/"/>
+              <Copyable value="https://unblind.app/" />
 
-                
-          <Tooltip content={<Text>Scan with https://unblind.app/ to review your sign request</Text>}>
-          <Image src={svg} />
-          </Tooltip>
+
+              {/* <Tooltip content={<Text>Scan with https://unblind.app/ to review your sign request</Text>}> */}
+              <Image src={svg} />
+              {/* </Tooltip> */}
           </Box>
         ),
         severity: SeverityLevel.Critical,
@@ -348,8 +359,13 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     JSON.stringify({ chainId, ...transaction }),
     1,
   );
-  
-  return (await showDialogUnblind(svg)) as OnTransactionResponse;
+
+  const hash = await getTransactionHash({
+      chainId,
+    ...transaction
+  });
+
+  return (await showDialogUnblind(svg, hash)) as OnTransactionResponse;
 };
 
 export const onSignature: OnSignatureHandler = async (data) => {
@@ -377,7 +393,9 @@ export const onSignature: OnSignatureHandler = async (data) => {
 
   const svg = await generateQRCode(JSON.stringify(signature), 1);
 
-  return (await showDialogUnblind(svg)) as OnSignatureResponse;
+  const hash = await getMessageHash(signature);
+
+  return (await showDialogUnblind(svg, hash)) as OnSignatureResponse;
 };
 
 
@@ -432,12 +450,47 @@ async function getUserInfo(userId: string): Promise<UserInfo> {
   return await response.json();
 };
 
+async function getMessageHash(message: any): Promise<string> {
+    const response = await fetch('http://localhost:3002/unblind/messageHash', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to get message hash');
+    }
+
+  let json = await response.json();
+  return json.hash;
+}
+
+
+async function getTransactionHash(transaction: any): Promise<string> {
+    const response = await fetch('http://localhost:3002/unblind/transactionHash', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(transaction),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to get transaction hash');
+    }
+
+  let json = await response.json();
+  return json.hash;
+}
+
 type UserState = {
   tgLinked: boolean;
 }
 
 async function getUserState(userId: string): Promise<UserState> {
-  const response = await fetch(`http://localhost:3002/unblind/userState/${userId}`, {
+    const response = await fetch(`http://localhost:3002/unblind/userState/${userId}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -475,9 +528,12 @@ export const onInstall: OnInstallHandler = async () => {
       type: 'alert',
       content: (
         <Box>
-          <Tooltip content={<Text>Connect to the telegram bot to receive 2nd factor notifications</Text>}>
+          {/* <Tooltip content={<Text>Connect to the telegram bot to receive 2nd factor notifications</Text>}> */}
+          {/* <Banner title="" severity="info"> */}
+          <Text>Scan to link your second factor</Text>
+          {/* </Banner> */}
           <Image src={qrCode} />
-          </Tooltip>
+          {/* </Tooltip> */}
         </Box>
       ),
     },
@@ -510,27 +566,27 @@ export const onHomePage: OnHomePageHandler = async () => {
     }
   }
 
-
   return {
     content: (
       <Box>
-        <Heading>Welcome to Unblind</Heading>
-         <Box alignment="center" center>
-         <Image src={unblindLogo} />
-        </Box>
-        <Text>
-          Scan QR codes to understand your transactions and signatures. Visit <Link href="https://unblind.app">unblind.app</Link> to learn more.
-        </Text>
-        {qrLinkAccount !== undefined &&
-                 <Box>
-
-          <Tooltip content={<Text>Scan with your phone camera to connect to the telegram bot and receive 2nd factor notifications</Text>}>
-              <Image src={qrLinkAccount} />
-              </Tooltip>
-
-          </Box>
-          }
-      </Box>
-    ),
-  };
+              {/* <Heading>Welcome to Unblind</Heading> */}
+              <Box alignment="center" center>
+                  <Image src={unblindLogo} />
+              </Box>
+              {qrLinkAccount !== undefined &&
+               <Box>
+                 <Text>
+                   Link your Telegram account to receive Second Factor messages. Visit <Link href="https://unblind.app">unblind.app</Link> to learn more.
+                 </Text>
+                 {/* <Tooltip content={<Text>Scan with your phone camera to connect to the telegram bot and receive 2nd factor notifications</Text>}> */}
+                 <Image src={qrLinkAccount} />
+                 {/* </Tooltip> */}
+               </Box>
+              }
+              {qrLinkAccount === undefined &&
+               <Text>Visit <Link href="https://unblind.app?userId={userId.toString()}">unblind.app</Link> to learn more.</Text>
+              }
+            </Box>
+        ),
+    };
 };
