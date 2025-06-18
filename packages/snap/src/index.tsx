@@ -48,12 +48,6 @@ async function apiRequest(
   return responseType === 'text' ? response.text() : response.json();
 }
 
-declare global {
-  interface Window {
-    ethereum: any;
-  }
-}
-
 // Returns a string of SVG code for an image depicting the given QR Code, with the given number
 // of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 /**
