@@ -1,10 +1,10 @@
 {
   "version": "0.1.0",
-  "description": "See through your transaction insights and protect your assets.",
-  "proposedName": "Unblind",
+  "description": "Get Telegram notifications with clear information of what you are about to sign.",
+  "proposedName": "Unblind Second Factor",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/bitfinding/unblind-second-factor-snap.git"
   },
   "source": {
     "shasum": "VIL5Mnc83vC5ANbslh/+/DcNDg3iRMB4tRDnrv3d3nA=",
