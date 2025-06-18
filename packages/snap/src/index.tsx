@@ -24,14 +24,7 @@ import { qrcodegen } from './qrcodegen.js';
 
 import { unblindLogo } from './assets';
 
-/**
- * Makes an API request to the Unblind backend
- * @param endpoint The API endpoint (without the base URL)
- * @param method HTTP method to use
- * @param body Optional request body
- * @param responseType Type of response expected ('json' or 'text')
- * @returns The response data
- */
+/** Helper for making requests to Unblind backend API */
 async function apiRequest(endpoint: string, method: string, body?: object, responseType: 'json' | 'text' = 'json') {
   const url = `http://localhost:3002/unblind/${endpoint}`;
   const options: RequestInit = {
@@ -93,10 +86,7 @@ function toSvgString(
   `;
 }
 
-/**
- * @description Compress data
- * @param data
- */
+/** Compresses transaction data using DEFLATE algorithm */
 function compressData(data: string): string {
   // Convert string to byte array
   const byteArray = new TextEncoder().encode(data);
@@ -114,23 +104,18 @@ function compressData(data: string): string {
   return btoa(String.fromCharCode.apply(null, compressedArray));
 }
 
-/**
- *
- * @param data
- */
+/** Generates QR code SVG from data */
 async function generateQRCodeRaw(data: string): Promise<string> {
-  // Generate QR code
   const QRC = qrcodegen.QrCode;
   const qrCode = QRC.encodeText(data, qrcodegen.QrCode.Ecc.LOW);
-
-  // Convert to SVG
+  
   const svg = toSvgString(qrCode, 1, 'white', '#1F2A35');
 
   return svg;
 }
 
+/** Generates QR code SVG for compressed transaction data with fallback to local generation */
 async function generateQRCode(data: string, mode: number): Promise<string> {
-  // Compress data before generating QR code
   const compressedData = compressData(data);
 
   try {
@@ -141,11 +126,6 @@ async function generateQRCode(data: string, mode: number): Promise<string> {
   }
 }
 
-/**
- *
- * @param data
- * @param mode
- */
 async function generateQRCodeRemote(
   data: string,
   mode: number,
@@ -178,12 +158,6 @@ const showDialogUnblind = async (svg: string, hash: string) => {
       qrLinkAccount = userInfo.qrCode;
     }
   }
-  //   <Text alignment="center">
-  //   Scan the QR code to review your transaction:
-  // </Text>
-  // <Box alignment="center" center>
-  // <Image src={unblindLogo} />
-  // </Box>
 
   // Split hash in half into hash1 and hash2
   const hash1 = hash.slice(0, hash.length / 2);
@@ -215,9 +189,7 @@ const showDialogUnblind = async (svg: string, hash: string) => {
 
         <Copyable value="https://unblind.app/" />
 
-        {/* <Tooltip content={<Text>Scan with https://unblind.app/ to review your sign request</Text>}> */}
         <Image src={svg} />
-        {/* </Tooltip> */}
       </Box>
     ),
     severity: SeverityLevel.Critical,
@@ -232,7 +204,7 @@ const showDialogUnblind = async (svg: string, hash: string) => {
 export const onTransaction: OnTransactionHandler = async (data) => {
   const { chainId, transaction } = data;
 
-  // Get userId from snap state
+  // Persist user state in encrypted snap storage
   const snapState = await snap.request({
     method: 'snap_manageState',
     params: {
@@ -263,7 +235,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
 export const onSignature: OnSignatureHandler = async (data) => {
   const { signature, signatureOrigin } = data;
 
-  // Get userId from snap state
+  // Persist user state in encrypted snap storage
   const snapState = await snap.request({
     method: 'snap_manageState',
     params: {
@@ -290,7 +262,7 @@ type UserInfo = {
   botLink: string;
 };
 
-// Add return type to signupUser
+/** Creates new user account in Unblind system and persists credentials */
 async function signupUser(): Promise<UserInfo> {
   const userInfo = await apiRequest('userSignup', 'POST');
 
@@ -353,12 +325,8 @@ export const onInstall: OnInstallHandler = async () => {
       type: 'alert',
       content: (
         <Box>
-          {/* <Tooltip content={<Text>Connect to the telegram bot to receive 2nd factor notifications</Text>}> */}
-          {/* <Banner title="" severity="info"> */}
           <Text>Scan to link your second factor</Text>
-          {/* </Banner> */}
           <Image src={qrCode} />
-          {/* </Tooltip> */}
         </Box>
       ),
     },
@@ -403,9 +371,7 @@ export const onHomePage: OnHomePageHandler = async () => {
               Visit <Link href="https://unblind.app">unblind.app</Link> to learn
               more.
             </Text>
-            {/* <Tooltip content={<Text>Scan with your phone camera to connect to the telegram bot and receive 2nd factor notifications</Text>}> */}
             <Image src={qrLinkAccount} />
-            {/* </Tooltip> */}
           </Box>
         )}
         {qrLinkAccount === undefined && (
