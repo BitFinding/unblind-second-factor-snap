@@ -1,10 +1,10 @@
 {
-  "name": "snap",
+  "name": "unblind-second-factor-snap",
   "version": "0.1.0",
-  "description": "The 'Hello, world!' of MetaMask Snaps, now written in TypeScript.",
+  "description": "Get Telegram notifications with clear information of what you are about to sign.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/bitfinding/unblind-second-factor-snap.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
   "main": "./dist/bundle.js",
