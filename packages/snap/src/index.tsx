@@ -182,8 +182,6 @@ const showDialogUnblind = async (svg: string, hash: string) => {
         </Box>
         <Divider />
         <Box direction="horizontal">
-          {/* <Icon name="qr-code" ></Icon> */}
-          {/* <Heading>Scan the QR code to understand your transaction with:</Heading> */}
           <Text>Scan the QR code to understand your transaction with:</Text>
         </Box>
 
