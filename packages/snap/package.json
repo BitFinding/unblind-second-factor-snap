@@ -10,6 +10,7 @@
   "main": "./dist/bundle.js",
   "files": [
     "dist/",
+    "assets/",
     "snap.manifest.json"
   ],
   "scripts": {
