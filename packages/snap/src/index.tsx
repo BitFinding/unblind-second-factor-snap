@@ -25,7 +25,12 @@ import { qrcodegen } from './qrcodegen.js';
 import { unblindLogo } from './assets';
 
 /** Helper for making requests to Unblind backend API */
-async function apiRequest(endpoint: string, method: string, body?: object, responseType: 'json' | 'text' = 'json') {
+async function apiRequest(
+  endpoint: string,
+  method: string,
+  body?: object,
+  responseType: 'json' | 'text' = 'json',
+) {
   const url = `http://localhost:3002/unblind/${endpoint}`;
   const options: RequestInit = {
     method,
@@ -108,7 +113,7 @@ function compressData(data: string): string {
 async function generateQRCodeRaw(data: string): Promise<string> {
   const QRC = qrcodegen.QrCode;
   const qrCode = QRC.encodeText(data, qrcodegen.QrCode.Ecc.LOW);
-  
+
   const svg = toSvgString(qrCode, 1, 'white', '#1F2A35');
 
   return svg;
