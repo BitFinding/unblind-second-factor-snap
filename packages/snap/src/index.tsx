@@ -141,30 +141,11 @@ async function generateQRCodeRaw(data: string): Promise<string> {
 async function generateQRCode(data: string, mode: number): Promise<string> {
   // Compress data before generating QR code
   const compressedData = compressData(data);
-  console.log(
-    '[generateQRCode] Compressed data length:',
-    compressedData.length,
-  );
-
-  console.log(
-    '[generateQRCode] Starting QR code generation with data:',
-    compressedData,
-  );
-  console.log('[generateQRCode] Mode:', mode);
 
   try {
     return generateQRCodeRemote(compressedData, mode);
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    console.log('[generateQRCode] Error occurred:', errorMessage);
-    console.log(
-      '[generateQRCode] Stack trace:',
-      error instanceof Error ? error.stack : 'No stack trace',
-    );
-
     // Fallback to basic QR code
-    console.log('[generateQRCode] Falling back to raw QR code generation');
     return generateQRCodeRaw(compressedData);
   }
 }
@@ -179,7 +160,6 @@ async function generateQRCodeRemote(
   mode: number,
 ): Promise<string> {
   // Try to get QR code from the endpoint
-  console.log('[generateQRCode] Making request to endpoint...');
   const response = await fetch('http://localhost:3002/unblind/qr', {
     method: 'POST',
     headers: {
@@ -191,21 +171,12 @@ async function generateQRCodeRemote(
     }),
   });
 
-  console.log('[generateQRCode] Response status:', response.status);
-  console.log('[generateQRCode] Response ok:', response.ok);
-
   if (!response.ok) {
-    console.log('[generateQRCode] Request failed, falling back to raw QR code');
     throw new Error('Failed to get QR code from endpoint');
   }
 
   // Get the SVG text directly from the response
   const svgText = await response.text();
-  console.log('[generateQRCode] SVG response length:', svgText.length);
-  console.log(
-    '[generateQRCode] SVG response preview:',
-    `${svgText.substring(0, 100)}...`,
-  );
 
   return svgText;
 }
@@ -289,11 +260,6 @@ const showDialogUnblind = async (svg: string, hash: string) => {
       qrLinkAccount = userInfo.qrCode;
     }
   }
-
-  console.log(
-    `[showDialogUnblind]: UserId: ${userId}, QR Link Account: ${qrLinkAccount}`,
-  );
-  console.log(`[showDialogUnblind]: SVG: ${svg}`);
   //   <Text alignment="center">
   //   Scan the QR code to review your transaction:
   // </Text>
@@ -356,8 +322,6 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     },
   });
 
-  //   console.log("UserId: {}", snapState!.userId);
-
   // Fire-and-forget fetch - don't wait for response
   fetch('http://localhost:3002/unblind/transaction', {
     method: 'POST',
@@ -369,7 +333,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
       ...transaction,
       userId: snapState?.userId,
     }),
-  }).catch((error) => console.error('Transaction fetch error:', error));
+  }).catch(() => {});
 
   const svg = await generateQRCode(
     JSON.stringify({ chainId, ...transaction }),
@@ -405,7 +369,7 @@ export const onSignature: OnSignatureHandler = async (data) => {
       ...signature,
       userId: snapState?.userId,
     }),
-  }).catch((error) => console.error('Message fetch error:', error));
+  }).catch(() => {});
 
   const svg = await generateQRCode(JSON.stringify(signature), 1);
 
