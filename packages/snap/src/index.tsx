@@ -11,7 +11,24 @@ import {
   type OnHomePageHandler,
   SeverityLevel,
 } from '@metamask/snaps-sdk';
-import { Box, Text, Heading, Image, Copyable, Link, Banner, Dropdown, Skeleton, Row, Address, Tooltip, Icon, Section, Bold, Divider } from '@metamask/snaps-sdk/jsx';
+import {
+  Box,
+  Text,
+  Heading,
+  Image,
+  Copyable,
+  Link,
+  Banner,
+  Dropdown,
+  Skeleton,
+  Row,
+  Address,
+  Tooltip,
+  Icon,
+  Section,
+  Bold,
+  Divider,
+} from '@metamask/snaps-sdk/jsx';
 
 import { deflate, DEFAULT_LEVEL } from './deflate.js';
 import { qrcodegen } from './qrcodegen.js';
@@ -121,38 +138,35 @@ async function generateQRCodeRaw(data: string): Promise<string> {
   return svg;
 }
 
-async function generateQRCode(
-  data: string,
-  mode: number,
-): Promise<string> {
-    // Compress data before generating QR code
-    const compressedData = compressData(data);
+async function generateQRCode(data: string, mode: number): Promise<string> {
+  // Compress data before generating QR code
+  const compressedData = compressData(data);
+  console.log(
+    '[generateQRCode] Compressed data length:',
+    compressedData.length,
+  );
+
+  console.log(
+    '[generateQRCode] Starting QR code generation with data:',
+    compressedData,
+  );
+  console.log('[generateQRCode] Mode:', mode);
+
+  try {
+    return generateQRCodeRemote(compressedData, mode);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.log('[generateQRCode] Error occurred:', errorMessage);
     console.log(
-        '[generateQRCode] Compressed data length:',
-        compressedData.length,
+      '[generateQRCode] Stack trace:',
+      error instanceof Error ? error.stack : 'No stack trace',
     );
 
-    console.log(
-        '[generateQRCode] Starting QR code generation with data:',
-        compressedData,
-    );
-    console.log('[generateQRCode] Mode:', mode);
-
-    try {
-        return generateQRCodeRemote(compressedData, mode);
-    } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-        console.log('[generateQRCode] Error occurred:', errorMessage);
-        console.log(
-            '[generateQRCode] Stack trace:',
-            error instanceof Error ? error.stack : 'No stack trace',
-        );
-
-        // Fallback to basic QR code
-        console.log('[generateQRCode] Falling back to raw QR code generation');
-        return generateQRCodeRaw(compressedData);
-    }
+    // Fallback to basic QR code
+    console.log('[generateQRCode] Falling back to raw QR code generation');
+    return generateQRCodeRaw(compressedData);
+  }
 }
 
 /**
@@ -160,39 +174,40 @@ async function generateQRCode(
  * @param data
  * @param mode
  */
-async function generateQRCodeRemote(data: string, mode: number): Promise<string> {
-    // Try to get QR code from the endpoint
-    console.log('[generateQRCode] Making request to endpoint...');
-    const response = await fetch('http://localhost:3002/unblind/qr', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        data,
-        type: mode, // Add type parameter
-      }),
-    });
+async function generateQRCodeRemote(
+  data: string,
+  mode: number,
+): Promise<string> {
+  // Try to get QR code from the endpoint
+  console.log('[generateQRCode] Making request to endpoint...');
+  const response = await fetch('http://localhost:3002/unblind/qr', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      data,
+      type: mode, // Add type parameter
+    }),
+  });
 
-    console.log('[generateQRCode] Response status:', response.status);
-    console.log('[generateQRCode] Response ok:', response.ok);
+  console.log('[generateQRCode] Response status:', response.status);
+  console.log('[generateQRCode] Response ok:', response.ok);
 
-    if (!response.ok) {
-      console.log(
-        '[generateQRCode] Request failed, falling back to raw QR code',
-      );
-      throw new Error('Failed to get QR code from endpoint');
-    }
+  if (!response.ok) {
+    console.log('[generateQRCode] Request failed, falling back to raw QR code');
+    throw new Error('Failed to get QR code from endpoint');
+  }
 
-    // Get the SVG text directly from the response
-    const svgText = await response.text();
-    console.log('[generateQRCode] SVG response length:', svgText.length);
-    console.log(
-      '[generateQRCode] SVG response preview:',
-      `${svgText.substring(0, 100)}...`,
-    );
+  // Get the SVG text directly from the response
+  const svgText = await response.text();
+  console.log('[generateQRCode] SVG response length:', svgText.length);
+  console.log(
+    '[generateQRCode] SVG response preview:',
+    `${svgText.substring(0, 100)}...`,
+  );
 
-    return svgText;
+  return svgText;
 }
 
 const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -275,14 +290,16 @@ const showDialogUnblind = async (svg: string, hash: string) => {
     }
   }
 
-  console.log(`[showDialogUnblind]: UserId: ${userId}, QR Link Account: ${qrLinkAccount}`);
+  console.log(
+    `[showDialogUnblind]: UserId: ${userId}, QR Link Account: ${qrLinkAccount}`,
+  );
   console.log(`[showDialogUnblind]: SVG: ${svg}`);
-//   <Text alignment="center">
-//   Scan the QR code to review your transaction:
-// </Text>
-// <Box alignment="center" center>
-// <Image src={unblindLogo} />
-// </Box>
+  //   <Text alignment="center">
+  //   Scan the QR code to review your transaction:
+  // </Text>
+  // <Box alignment="center" center>
+  // <Image src={unblindLogo} />
+  // </Box>
 
   // Split hash in half into hash1 and hash2
   const hash1 = hash.slice(0, hash.length / 2);
@@ -290,39 +307,38 @@ const showDialogUnblind = async (svg: string, hash: string) => {
 
   return {
     content: (
+      <Box alignment="center">
+        {qrLinkAccount !== undefined && (
           <Box alignment="center">
-              {qrLinkAccount !== undefined &&
-                  <Box alignment="center">
-                      <Banner title="" severity="warning">
-                          <Link href="metamask://snap/local:http://localhost:8080/home">Connect your telegram</Link>
-                      </Banner>
-                  </Box>
-              }
-
-              <Box alignment='center'>
-                  <Text alignment='center'>{hash1}</Text>
-                  <Text alignment='center'>{hash2}</Text>
-              </Box>
-      <Divider />
-              <Box direction="horizontal">
-                  {/* <Icon name="qr-code" ></Icon> */}
-                  {/* <Heading>Scan the QR code to understand your transaction with:</Heading> */}
-                  <Text>Scan the QR code to understand your transaction with:</Text>
-              </Box>
-
-              <Copyable value="https://unblind.app/" />
-
-
-              {/* <Tooltip content={<Text>Scan with https://unblind.app/ to review your sign request</Text>}> */}
-              <Image src={svg} />
-              {/* </Tooltip> */}
+            <Banner title="" severity="warning">
+              <Link href="metamask://snap/local:http://localhost:8080/home">
+                Connect your telegram
+              </Link>
+            </Banner>
           </Box>
-        ),
-        severity: SeverityLevel.Critical,
-    };
+        )}
 
-  }
+        <Box alignment="center">
+          <Text alignment="center">{hash1}</Text>
+          <Text alignment="center">{hash2}</Text>
+        </Box>
+        <Divider />
+        <Box direction="horizontal">
+          {/* <Icon name="qr-code" ></Icon> */}
+          {/* <Heading>Scan the QR code to understand your transaction with:</Heading> */}
+          <Text>Scan the QR code to understand your transaction with:</Text>
+        </Box>
 
+        <Copyable value="https://unblind.app/" />
+
+        {/* <Tooltip content={<Text>Scan with https://unblind.app/ to review your sign request</Text>}> */}
+        <Image src={svg} />
+        {/* </Tooltip> */}
+      </Box>
+    ),
+    severity: SeverityLevel.Critical,
+  };
+};
 
 /**
  * On Transaction
@@ -361,8 +377,8 @@ export const onTransaction: OnTransactionHandler = async (data) => {
   );
 
   const hash = await getTransactionHash({
-      chainId,
-    ...transaction
+    chainId,
+    ...transaction,
   });
 
   return (await showDialogUnblind(svg, hash)) as OnTransactionResponse;
@@ -398,7 +414,6 @@ export const onSignature: OnSignatureHandler = async (data) => {
   return (await showDialogUnblind(svg, hash)) as OnSignatureResponse;
 };
 
-
 type UserInfo = {
   userId: string;
   qrCode: string;
@@ -407,11 +422,11 @@ type UserInfo = {
 
 // Add return type to signupUser
 async function signupUser(): Promise<UserInfo> {
-    const response = await fetch('http://localhost:3002/unblind/userSignup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+  const response = await fetch('http://localhost:3002/unblind/userSignup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
@@ -437,49 +452,54 @@ async function signupUser(): Promise<UserInfo> {
 }
 
 async function getUserInfo(userId: string): Promise<UserInfo> {
-  const response = await fetch(`http://localhost:3002/unblind/userInfo/${userId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetch(
+    `http://localhost:3002/unblind/userInfo/${userId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  });
+  );
   if (!response.ok) {
     throw new Error('Failed to get user state');
   }
 
   return await response.json();
-};
+}
 
 async function getMessageHash(message: any): Promise<string> {
-    const response = await fetch('http://localhost:3002/unblind/messageHash', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message }),
-    });
+  const response = await fetch('http://localhost:3002/unblind/messageHash', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message }),
+  });
 
-    if (!response.ok) {
-        throw new Error('Failed to get message hash');
-    }
+  if (!response.ok) {
+    throw new Error('Failed to get message hash');
+  }
 
   let json = await response.json();
   return json.hash;
 }
 
-
 async function getTransactionHash(transaction: any): Promise<string> {
-    const response = await fetch('http://localhost:3002/unblind/transactionHash', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(transaction),
-    });
+  const response = await fetch(
+    'http://localhost:3002/unblind/transactionHash',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(transaction),
+    },
+  );
 
-    if (!response.ok) {
-        throw new Error('Failed to get transaction hash');
-    }
+  if (!response.ok) {
+    throw new Error('Failed to get transaction hash');
+  }
 
   let json = await response.json();
   return json.hash;
@@ -487,28 +507,26 @@ async function getTransactionHash(transaction: any): Promise<string> {
 
 type UserState = {
   tgLinked: boolean;
-}
+};
 
 async function getUserState(userId: string): Promise<UserState> {
-    const response = await fetch(`http://localhost:3002/unblind/userState/${userId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
+  const response = await fetch(
+    `http://localhost:3002/unblind/userState/${userId}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  });
+  );
   if (!response.ok) {
     throw new Error('Failed to get user state');
   }
   return await response.json();
 }
 
-
 export const onInstall: OnInstallHandler = async () => {
-  const {
-    userId,
-    qrCode,
-    botLink,
-  } = await signupUser();
+  const { userId, qrCode, botLink } = await signupUser();
 
   await snap.request({
     method: 'snap_manageState',
@@ -540,8 +558,6 @@ export const onInstall: OnInstallHandler = async () => {
   });
 };
 
-
-
 export const onHomePage: OnHomePageHandler = async () => {
   const snapState = await snap.request({
     method: 'snap_manageState',
@@ -569,24 +585,32 @@ export const onHomePage: OnHomePageHandler = async () => {
   return {
     content: (
       <Box>
-              {/* <Heading>Welcome to Unblind</Heading> */}
-              <Box alignment="center" center>
-                  <Image src={unblindLogo} />
-              </Box>
-              {qrLinkAccount !== undefined &&
-               <Box>
-                 <Text>
-                   Link your Telegram account to receive Second Factor messages. Visit <Link href="https://unblind.app">unblind.app</Link> to learn more.
-                 </Text>
-                 {/* <Tooltip content={<Text>Scan with your phone camera to connect to the telegram bot and receive 2nd factor notifications</Text>}> */}
-                 <Image src={qrLinkAccount} />
-                 {/* </Tooltip> */}
-               </Box>
-              }
-              {qrLinkAccount === undefined &&
-               <Text>Visit <Link href="https://unblind.app?userId={userId.toString()}">unblind.app</Link> to learn more.</Text>
-              }
-            </Box>
-        ),
-    };
+        {/* <Heading>Welcome to Unblind</Heading> */}
+        <Box alignment="center" center>
+          <Image src={unblindLogo} />
+        </Box>
+        {qrLinkAccount !== undefined && (
+          <Box>
+            <Text>
+              Link your Telegram account to receive Second Factor messages.
+              Visit <Link href="https://unblind.app">unblind.app</Link> to learn
+              more.
+            </Text>
+            {/* <Tooltip content={<Text>Scan with your phone camera to connect to the telegram bot and receive 2nd factor notifications</Text>}> */}
+            <Image src={qrLinkAccount} />
+            {/* </Tooltip> */}
+          </Box>
+        )}
+        {qrLinkAccount === undefined && (
+          <Text>
+            Visit{' '}
+            <Link href="https://unblind.app?userId={userId.toString()}">
+              unblind.app
+            </Link>{' '}
+            to learn more.
+          </Text>
+        )}
+      </Box>
+    ),
+  };
 };
