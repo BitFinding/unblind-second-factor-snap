@@ -1,4 +1,4 @@
-const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+export const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M124 51H0V80H124V51Z" fill="#1F2A35"/>
   <mask id="mask0_959_905" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="6" y="0" width="113" height="52">
   <rect x="6" width="113" height="51.5189" fill="white"/>
@@ -44,7 +44,7 @@ const unblindLogoDark = `<svg width="124" height="81" viewBox="0 0 124 81" fill=
   </svg>
   `;
 
-const unblindLogo = `<svg width="124" height="80" viewBox="0 0 124 80" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+export const unblindLogo = `<svg width="124" height="80" viewBox="0 0 124 80" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <rect width="124" height="80" fill="url(#pattern0_960_2249)"/>
   <defs>
   <pattern id="pattern0_960_2249" patternContentUnits="objectBoundingBox" width="1" height="1">

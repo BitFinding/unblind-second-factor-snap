@@ -363,7 +363,6 @@ export const onHomePage: OnHomePageHandler = async () => {
   return {
     content: (
       <Box>
-        {/* <Heading>Welcome to Unblind</Heading> */}
         <Box alignment="center" center>
           <Image src={unblindLogo} />
         </Box>
@@ -379,10 +378,10 @@ export const onHomePage: OnHomePageHandler = async () => {
         )}
         {qrLinkAccount === undefined && (
           <Text>
-            Visit{' '}
+            Visit
             <Link href="https://unblind.app?userId={userId.toString()}">
               unblind.app
-            </Link>{' '}
+            </Link>
             to learn more.
           </Text>
         )}
