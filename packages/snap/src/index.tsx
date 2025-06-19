@@ -100,7 +100,7 @@ function compressData(data: string): string {
   const compressedArray = new Uint8Array(compressed);
 
   // Convert to base64
-  return btoa(String.fromCharCode.apply(null, compressedArray));
+  return Buffer.from(compressedArray).toString('base64');
 }
 
 /** Generates QR code SVG from data */
@@ -283,12 +283,12 @@ async function getUserInfo(userId: string): Promise<UserInfo> {
   return await apiRequest(`userInfo/${userId}`, 'GET');
 }
 
-async function getMessageHash(message: any): Promise<string> {
+async function getMessageHash(message: object): Promise<string> {
   const json = await apiRequest('messageHash', 'POST', { message });
   return json.hash;
 }
 
-async function getTransactionHash(transaction: any): Promise<string> {
+async function getTransactionHash(transaction: object): Promise<string> {
   const json = await apiRequest('transactionHash', 'POST', transaction);
   return json.hash;
 }
