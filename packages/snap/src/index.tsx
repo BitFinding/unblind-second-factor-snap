@@ -284,7 +284,7 @@ async function getUserInfo(userId: string): Promise<UserInfo> {
 }
 
 async function getMessageHash(message: object): Promise<string> {
-  const json = await apiRequest('messageHash', 'POST', { message });
+  const json = await apiRequest('messageHash', 'POST', message);
   return json.hash;
 }
 
