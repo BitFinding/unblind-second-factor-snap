@@ -7,12 +7,12 @@
     "url": "https://github.com/bitfinding/unblind-second-factor-snap.git"
   },
   "source": {
-    "shasum": "VIL5Mnc83vC5ANbslh/+/DcNDg3iRMB4tRDnrv3d3nA=",
+    "shasum": "mPxyITFidvasSZH+CZOhKF/t+hIxI0SIW0/Hy4hs/Wk=",
     "location": {
       "npm": {
         "iconPath": "assets/icon.svg",
         "filePath": "dist/bundle.js",
-        "packageName": "snap",
+        "packageName": "unblind-second-factor-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
