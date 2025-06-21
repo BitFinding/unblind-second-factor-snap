@@ -8,7 +8,6 @@ import {
   type OnHomePageHandler,
   SeverityLevel,
 } from '@metamask/snaps-sdk';
-
 import {
   Box,
   Text,
@@ -19,12 +18,18 @@ import {
   Divider,
 } from '@metamask/snaps-sdk/jsx';
 
+import { unblindLogo } from './assets';
 import { deflate, DEFAULT_LEVEL } from './deflate.js';
 import { qrcodegen } from './qrcodegen.js';
 
-import { unblindLogo } from './assets';
-
-/** Helper for making requests to Unblind backend API */
+/**
+ * Helper for making requests to Unblind backend API
+ *
+ * @param endpoint
+ * @param method
+ * @param body
+ * @param responseType
+ */
 async function apiRequest(
   endpoint: string,
   method: string,
@@ -85,7 +90,11 @@ function toSvgString(
   `;
 }
 
-/** Compresses transaction data using DEFLATE algorithm */
+/**
+ * Compresses transaction data using DEFLATE algorithm
+ *
+ * @param data
+ */
 function compressData(data: string): string {
   // Convert string to byte array
   const byteArray = new TextEncoder().encode(data);
@@ -103,7 +112,11 @@ function compressData(data: string): string {
   return Buffer.from(compressedArray).toString('base64');
 }
 
-/** Generates QR code SVG from data */
+/**
+ * Generates QR code SVG from data
+ *
+ * @param data
+ */
 async function generateQRCodeRaw(data: string): Promise<string> {
   const QRC = qrcodegen.QrCode;
   const qrCode = QRC.encodeText(data, qrcodegen.QrCode.Ecc.LOW);
@@ -113,7 +126,12 @@ async function generateQRCodeRaw(data: string): Promise<string> {
   return svg;
 }
 
-/** Generates QR code SVG for compressed transaction data with fallback to local generation */
+/**
+ * Generates QR code SVG for compressed transaction data with fallback to local generation
+ *
+ * @param data
+ * @param mode
+ */
 async function generateQRCode(data: string, mode: number): Promise<string> {
   const compressedData = compressData(data);
 
@@ -125,6 +143,11 @@ async function generateQRCode(data: string, mode: number): Promise<string> {
   }
 }
 
+/**
+ *
+ * @param data
+ * @param mode
+ */
 async function generateQRCodeRemote(
   data: string,
   mode: number,
@@ -149,8 +172,7 @@ const showDialogUnblind = async (svg: string, hash: string) => {
       // If no userId, call signupUser to get userId
       const userSignup = await signupUser();
       qrLinkAccount = userSignup.qrCode;
-    } catch (error) {
-    }
+    } catch (error) {}
   } else {
     try {
       const userIdStr = userId.toString();
@@ -271,13 +293,13 @@ type UserInfo = {
 async function signupUser(): Promise<UserInfo> {
   const MAX_ATTEMPTS = 3;
   const BASE_DELAY = 300; // 300ms between attempts
-  
+
   let lastError: Error;
-  
+
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
       const userInfo = await apiRequest('userSignup', 'POST');
-      
+
       // Save in snap
       await snap.request({
         method: 'snap_manageState',
@@ -290,30 +312,42 @@ async function signupUser(): Promise<UserInfo> {
           },
         },
       });
-      
+
       return userInfo;
     } catch (error) {
       lastError = error as Error;
       if (attempt < MAX_ATTEMPTS - 1) {
-        await new Promise(resolve => 
-          setTimeout(resolve, BASE_DELAY * (attempt + 1))
+        await new Promise((resolve) =>
+          setTimeout(resolve, BASE_DELAY * (attempt + 1)),
         );
       }
     }
   }
-  
+
   throw new Error(`Signup failed: ${lastError.message}`);
 }
 
+/**
+ *
+ * @param userId
+ */
 async function getUserInfo(userId: string): Promise<UserInfo> {
   return await apiRequest(`userInfo/${userId}`, 'GET');
 }
 
+/**
+ *
+ * @param message
+ */
 async function getMessageHash(message: object): Promise<string> {
   const json = await apiRequest('messageHash', 'POST', message);
   return json.hash;
 }
 
+/**
+ *
+ * @param transaction
+ */
 async function getTransactionHash(transaction: object): Promise<string> {
   const json = await apiRequest('transactionHash', 'POST', transaction);
   return json.hash;
@@ -323,6 +357,10 @@ type UserState = {
   tgLinked: boolean;
 };
 
+/**
+ *
+ * @param userId
+ */
 async function getUserState(userId: string): Promise<UserState> {
   return await apiRequest(`userState/${userId}`, 'GET');
 }
@@ -364,8 +402,8 @@ export const onInstall: OnInstallHandler = async () => {
           <Box>
             <Text>⚠️ Connection Error</Text>
             <Text>
-              Temporary service outage. You can still use Unblind, but 
-              Telegram linking will be available later through settings.
+              Temporary service outage. You can still use Unblind, but Telegram
+              linking will be available later through settings.
             </Text>
           </Box>
         ),
