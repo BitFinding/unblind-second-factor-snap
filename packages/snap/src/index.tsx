@@ -145,16 +145,24 @@ const showDialogUnblind = async (svg: string, hash: string) => {
   const userId = snapState?.userId;
   let qrLinkAccount: string | undefined;
   if (!userId) {
-    // If no userId, call signupUser to get userId
-    const userSignup = await signupUser();
-    qrLinkAccount = userSignup.qrCode;
+    try {
+      // If no userId, call signupUser to get userId
+      const userSignup = await signupUser();
+      qrLinkAccount = userSignup.qrCode;
+    } catch (error) {
+    }
   } else {
-    const userIdStr = userId.toString();
-    // Check state of userId otherwise
-    const userState = await getUserState(userIdStr);
-    if (!userState.tgLinked) {
-      const userInfo = await getUserInfo(userIdStr);
-      qrLinkAccount = userInfo.qrCode;
+    try {
+      const userIdStr = userId.toString();
+      // Check state of userId otherwise
+      const userState = await getUserState(userIdStr);
+      if (!userState.tgLinked) {
+        const userInfo = await getUserInfo(userIdStr);
+        qrLinkAccount = userInfo.qrCode;
+      }
+    } catch (error) {
+      // Assume not linked but don't show QR code
+      qrLinkAccount = undefined;
     }
   }
 
@@ -261,22 +269,40 @@ type UserInfo = {
 
 /** Creates new user account in Unblind system and persists credentials */
 async function signupUser(): Promise<UserInfo> {
-  const userInfo = await apiRequest('userSignup', 'POST');
-
-  // Save in snap
-  await snap.request({
-    method: 'snap_manageState',
-    params: {
-      operation: 'update',
-      newState: {
-        userId: userInfo.userId,
-        qrCode: userInfo.qrCode,
-        botLink: userInfo.botLink,
-      },
-    },
-  });
-
-  return userInfo;
+  const MAX_ATTEMPTS = 3;
+  const BASE_DELAY = 300; // 300ms between attempts
+  
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      const userInfo = await apiRequest('userSignup', 'POST');
+      
+      // Save in snap
+      await snap.request({
+        method: 'snap_manageState',
+        params: {
+          operation: 'update',
+          newState: {
+            userId: userInfo.userId,
+            qrCode: userInfo.qrCode,
+            botLink: userInfo.botLink,
+          },
+        },
+      });
+      
+      return userInfo;
+    } catch (error) {
+      lastError = error as Error;
+      if (attempt < MAX_ATTEMPTS - 1) {
+        await new Promise(resolve => 
+          setTimeout(resolve, BASE_DELAY * (attempt + 1))
+        );
+      }
+    }
+  }
+  
+  throw new Error(`Signup failed: ${lastError.message}`);
 }
 
 async function getUserInfo(userId: string): Promise<UserInfo> {
@@ -302,32 +328,52 @@ async function getUserState(userId: string): Promise<UserState> {
 }
 
 export const onInstall: OnInstallHandler = async () => {
-  const { userId, qrCode, botLink } = await signupUser();
+  try {
+    const { userId, qrCode, botLink } = await signupUser();
 
-  await snap.request({
-    method: 'snap_manageState',
-    params: {
-      operation: 'update',
-      newState: {
-        userId,
-        qrCode,
-        botLink,
+    await snap.request({
+      method: 'snap_manageState',
+      params: {
+        operation: 'update',
+        newState: {
+          userId,
+          qrCode,
+          botLink,
+        },
       },
-    },
-  });
+    });
 
-  await snap.request({
-    method: 'snap_dialog',
-    params: {
-      type: 'alert',
-      content: (
-        <Box>
-          <Text>Scan to link your second factor</Text>
-          <Image src={qrCode} />
-        </Box>
-      ),
-    },
-  });
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: (
+          <Box>
+            <Text>Scan to link your second factor</Text>
+            <Image src={qrCode} />
+          </Box>
+        ),
+      },
+    });
+  } catch (error) {
+    await snap.request({
+      method: 'snap_dialog',
+      params: {
+        type: 'alert',
+        content: (
+          <Box>
+            <Text>⚠️ Connection Error</Text>
+            <Text>
+              Temporary service outage. You can still use Unblind, but 
+              Telegram linking will be available later through settings.
+            </Text>
+          </Box>
+        ),
+      },
+    });
+    // Rethrow to maintain error visibility in logs
+    throw error;
+  }
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
