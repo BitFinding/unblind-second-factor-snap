@@ -14829,13 +14829,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nayuki-qr-code-generator@npm:^1.8.0":
-  version: 1.8.0
-  resolution: "nayuki-qr-code-generator@npm:1.8.0"
-  checksum: d004585d6a06285197752f83780b0806ea6eeb2df1e8bf2fd91c2c53ed40e4a6bd6fd59f89c813cf4481cbd74e3c017e8609e9ae88e40538af7aceab4c47d7d9
-  languageName: node
-  linkType: hard
-
 "negotiator@npm:0.6.3, negotiator@npm:^0.6.3":
   version: 0.6.3
   resolution: "negotiator@npm:0.6.3"
@@ -19162,7 +19155,6 @@ __metadata:
     eslint: ^9.11.0
     fflate: ^0.8.2
     jest: ^29.5.0
-    nayuki-qr-code-generator: ^1.8.0
     rimraf: ^3.0.2
     ts-jest: ^29.1.0
     typescript: ~5.7.3
