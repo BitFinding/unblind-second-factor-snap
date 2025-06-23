@@ -36,7 +36,7 @@ async function apiRequest(
   body?: object,
   responseType: 'json' | 'text' = 'json',
 ) {
-  const url = `http://localhost:3002/unblind/${endpoint}`;
+  const url = `https://api.unblind.app/unblind/${endpoint}`;
   const options: RequestInit = {
     method,
     headers: {
