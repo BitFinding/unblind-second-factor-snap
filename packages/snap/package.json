@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@metamask/snaps-sdk": "~8.1.0"
+    "fflate": "^0.8.2"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",

@@ -17,9 +17,9 @@ import {
   Banner,
   Divider,
 } from '@metamask/snaps-sdk/jsx';
+import { deflateSync } from 'fflate';
 
 import { unblindLogo } from './assets';
-import { deflate, DEFAULT_LEVEL } from './deflate.js';
 
 /**
  * Helper for making requests to Unblind backend API.
@@ -31,12 +31,12 @@ import { deflate, DEFAULT_LEVEL } from './deflate.js';
  * @returns The response from the API.
  */
 async function apiRequest(
-    endpoint: string,
-    method: string,
-    body?: object,
-    responseType: 'json' | 'text' = 'json',
+  endpoint: string,
+  method: string,
+  body?: object,
+  responseType: 'json' | 'text' = 'json',
 ) {
-    const url = `https://api.unblind.app/unblind/${endpoint}`;
+  const url = `https://api.unblind.app/unblind/${endpoint}`;
   const options: RequestInit = {
     method,
     headers: {
@@ -53,7 +53,6 @@ async function apiRequest(
   return responseType === 'text' ? response.text() : response.json();
 }
 
-
 /**
  * Compresses transaction data using DEFLATE algorithm.
  *
@@ -64,11 +63,8 @@ function compressData(data: string): string {
   // Convert string to byte array
   const byteArray = new TextEncoder().encode(data);
 
-  // Convert Uint8Array to regular array for deflate
-  const array = Array.from(byteArray);
-
   // Compress using deflate
-  const compressed = deflate(array, DEFAULT_LEVEL);
+  const compressed = deflateSync(byteArray, { level: 9 });
 
   // Convert compressed array to Uint8Array for base64 encoding
   const compressedArray = new Uint8Array(compressed);
@@ -78,7 +74,6 @@ function compressData(data: string): string {
     String.fromCharCode.apply(null, compressedArray as unknown as number[]),
   );
 }
-
 
 /**
  * Generates QR code SVG using a remote service.
@@ -91,12 +86,7 @@ async function generateQRCode(data: string, mode: number): Promise<string> {
   const compressedData = compressData(data);
 
   // Try to get QR code from the endpoint
-  return apiRequest(
-    'qr',
-    'POST',
-    { data: compressedData, type: mode },
-    'text',
-  );
+  return apiRequest('qr', 'POST', { data: compressedData, type: mode }, 'text');
 }
 
 const showDialogUnblind = async (svg: string, hash: string) => {
