@@ -177,13 +177,12 @@ const showDialogUnblind = async (svg: string, hash: string) => {
 
   const userId = snapState?.userId;
   let qrLinkAccount: string | undefined;
-  if (userId) {
+  if (userId && typeof userId === 'string') {
     try {
-      const userIdStr = String(userId);
       // Check state of userId otherwise
-      const userState = await getUserState(userIdStr);
+      const userState = await getUserState(userId);
       if (!userState.tgLinked) {
-        const userInfo = await getUserInfo(userIdStr);
+        const userInfo = await getUserInfo(userId);
         qrLinkAccount = userInfo.qrCode;
       }
     } catch (error) {
@@ -453,12 +452,11 @@ export const onHomePage: OnHomePageHandler = async () => {
 
   const userId = snapState?.userId;
   let qrLinkAccount: string | undefined;
-  if (userId) {
-    const userIdStr = String(userId);
+  if (userId && typeof userId === 'string') {
     // Check state of userId otherwise
-    const userState = await getUserState(userIdStr);
+    const userState = await getUserState(userId);
     if (!userState.tgLinked) {
-      const userInfo = await getUserInfo(userIdStr);
+      const userInfo = await getUserInfo(userId);
       qrLinkAccount = userInfo.qrCode;
     }
   } else {
@@ -486,7 +484,7 @@ export const onHomePage: OnHomePageHandler = async () => {
         {qrLinkAccount === undefined && (
           <Text>
             Visit
-            <Link href={`https://unblind.app?userId=${String(userId)}`}>
+            <Link href={`https://unblind.app?userId=${userId as string}`}>
               unblind.app
             </Link>
             to learn more.
