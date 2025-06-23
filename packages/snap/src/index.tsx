@@ -20,7 +20,6 @@ import {
 
 import { unblindLogo } from './assets';
 import { deflate, DEFAULT_LEVEL } from './deflate.js';
-import { qrcodegen } from './qrcodegen';
 
 /**
  * Helper for making requests to Unblind backend API.
@@ -32,12 +31,12 @@ import { qrcodegen } from './qrcodegen';
  * @returns The response from the API.
  */
 async function apiRequest(
-  endpoint: string,
-  method: string,
-  body?: object,
-  responseType: 'json' | 'text' = 'json',
+    endpoint: string,
+    method: string,
+    body?: object,
+    responseType: 'json' | 'text' = 'json',
 ) {
-  const url = `https://api.unblind.app/unblind/${endpoint}`;
+    const url = `https://api.unblind.app/unblind/${endpoint}`;
   const options: RequestInit = {
     method,
     headers: {
@@ -54,44 +53,6 @@ async function apiRequest(
   return responseType === 'text' ? response.text() : response.json();
 }
 
-// Returns a string of SVG code for an image depicting the given QR Code, with the given number
-// of border modules. The string always uses Unix newlines (\n), regardless of the platform.
-/**
- * Converts a QR code object to an SVG string.
- *
- * @param qr - The QR code object.
- * @param border - The number of border modules.
- * @param lightColor - The color of the light modules.
- * @param darkColor - The color of the dark modules.
- * @returns The SVG string representation of the QR code.
- */
-function toSvgString(
-  qr: qrcodegen.QrCode,
-  border: number,
-  lightColor: string,
-  darkColor: string,
-): string {
-  if (border < 0) {
-    throw new RangeError('Border must be non-negative');
-  }
-  const parts: string[] = [];
-  for (let yCoord = 0; yCoord < qr.size; yCoord++) {
-    for (let xCoord = 0; xCoord < qr.size; xCoord++) {
-      if (qr.getModule(xCoord, yCoord)) {
-        parts.push(`M${xCoord + border},${yCoord + border}h1v1h-1z`);
-      }
-    }
-  }
-  return `<?xml version="1.0" encoding="UTF-8"?>
-  <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 ${
-    qr.size + border * 2
-  } ${qr.size + border * 2}" stroke="none">
-    <rect width="100%" height="100%" fill="${lightColor}"/>
-    <path d="${parts.join(' ')}" fill="${darkColor}"/>
-  </svg>
-  `;
-}
 
 /**
  * Compresses transaction data using DEFLATE algorithm.
@@ -118,23 +79,9 @@ function compressData(data: string): string {
   );
 }
 
-/**
- * Generates QR code SVG from data.
- *
- * @param data - The data to encode in the QR code.
- * @returns A promise that resolves to the QR code SVG string.
- */
-async function generateQRCodeRaw(data: string): Promise<string> {
-  const QRC = qrcodegen.QrCode;
-  const qrCode = QRC.encodeText(data, qrcodegen.QrCode.Ecc.LOW);
-
-  const svg = toSvgString(qrCode, 1, 'white', '#1F2A35');
-
-  return svg;
-}
 
 /**
- * Generates QR code SVG for compressed transaction data with fallback to local generation.
+ * Generates QR code SVG using a remote service.
  *
  * @param data - The data to encode.
  * @param mode - The QR code generation mode.
@@ -143,28 +90,13 @@ async function generateQRCodeRaw(data: string): Promise<string> {
 async function generateQRCode(data: string, mode: number): Promise<string> {
   const compressedData = compressData(data);
 
-  try {
-    return generateQRCodeRemote(compressedData, mode);
-  } catch (error) {
-    // Fallback to basic QR code
-    return generateQRCodeRaw(compressedData);
-  }
-}
-
-/**
- * Generates QR code SVG using a remote service.
- *
- * @param data - The compressed data to send to the remote service.
- * @param mode - The QR code generation mode.
- * @returns A promise that resolves to the QR code SVG string from the remote.
- */
-async function generateQRCodeRemote(
-  data: string,
-  mode: number,
-): Promise<string> {
   // Try to get QR code from the endpoint
-  const svgText = await apiRequest('qr', 'POST', { data, type: mode }, 'text');
-  return svgText;
+  return apiRequest(
+    'qr',
+    'POST',
+    { data: compressedData, type: mode },
+    'text',
+  );
 }
 
 const showDialogUnblind = async (svg: string, hash: string) => {
