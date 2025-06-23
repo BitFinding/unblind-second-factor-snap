@@ -20,15 +20,16 @@ import {
 
 import { unblindLogo } from './assets';
 import { deflate, DEFAULT_LEVEL } from './deflate.js';
-import { qrcodegen } from './qrcodegen.js';
+import { qrcodegen } from './qrcodegen';
 
 /**
- * Helper for making requests to Unblind backend API
+ * Helper for making requests to Unblind backend API.
  *
- * @param endpoint
- * @param method
- * @param body
- * @param responseType
+ * @param endpoint - The API endpoint to call.
+ * @param method - The HTTP method to use.
+ * @param body - The request body.
+ * @param responseType - The expected response type.
+ * @returns The response from the API.
  */
 async function apiRequest(
   endpoint: string,
@@ -56,11 +57,13 @@ async function apiRequest(
 // Returns a string of SVG code for an image depicting the given QR Code, with the given number
 // of border modules. The string always uses Unix newlines (\n), regardless of the platform.
 /**
+ * Converts a QR code object to an SVG string.
  *
- * @param qr
- * @param border
- * @param lightColor
- * @param darkColor
+ * @param qr - The QR code object.
+ * @param border - The number of border modules.
+ * @param lightColor - The color of the light modules.
+ * @param darkColor - The color of the dark modules.
+ * @returns The SVG string representation of the QR code.
  */
 function toSvgString(
   qr: qrcodegen.QrCode,
@@ -72,10 +75,10 @@ function toSvgString(
     throw new RangeError('Border must be non-negative');
   }
   const parts: string[] = [];
-  for (let y = 0; y < qr.size; y++) {
-    for (let x = 0; x < qr.size; x++) {
-      if (qr.getModule(x, y)) {
-        parts.push(`M${x + border},${y + border}h1v1h-1z`);
+  for (let yCoord = 0; yCoord < qr.size; yCoord++) {
+    for (let xCoord = 0; xCoord < qr.size; xCoord++) {
+      if (qr.getModule(xCoord, yCoord)) {
+        parts.push(`M${xCoord + border},${yCoord + border}h1v1h-1z`);
       }
     }
   }
@@ -91,9 +94,10 @@ function toSvgString(
 }
 
 /**
- * Compresses transaction data using DEFLATE algorithm
+ * Compresses transaction data using DEFLATE algorithm.
  *
- * @param data
+ * @param data - The string data to compress.
+ * @returns The compressed data as a base64 string.
  */
 function compressData(data: string): string {
   // Convert string to byte array
@@ -109,13 +113,16 @@ function compressData(data: string): string {
   const compressedArray = new Uint8Array(compressed);
 
   // Convert to base64
-  return Buffer.from(compressedArray).toString('base64');
+  return btoa(
+    String.fromCharCode.apply(null, compressedArray as unknown as number[]),
+  );
 }
 
 /**
- * Generates QR code SVG from data
+ * Generates QR code SVG from data.
  *
- * @param data
+ * @param data - The data to encode in the QR code.
+ * @returns A promise that resolves to the QR code SVG string.
  */
 async function generateQRCodeRaw(data: string): Promise<string> {
   const QRC = qrcodegen.QrCode;
@@ -127,10 +134,11 @@ async function generateQRCodeRaw(data: string): Promise<string> {
 }
 
 /**
- * Generates QR code SVG for compressed transaction data with fallback to local generation
+ * Generates QR code SVG for compressed transaction data with fallback to local generation.
  *
- * @param data
- * @param mode
+ * @param data - The data to encode.
+ * @param mode - The QR code generation mode.
+ * @returns A promise that resolves to the QR code SVG string.
  */
 async function generateQRCode(data: string, mode: number): Promise<string> {
   const compressedData = compressData(data);
@@ -144,9 +152,11 @@ async function generateQRCode(data: string, mode: number): Promise<string> {
 }
 
 /**
+ * Generates QR code SVG using a remote service.
  *
- * @param data
- * @param mode
+ * @param data - The compressed data to send to the remote service.
+ * @param mode - The QR code generation mode.
+ * @returns A promise that resolves to the QR code SVG string from the remote.
  */
 async function generateQRCodeRemote(
   data: string,
@@ -167,15 +177,9 @@ const showDialogUnblind = async (svg: string, hash: string) => {
 
   const userId = snapState?.userId;
   let qrLinkAccount: string | undefined;
-  if (!userId) {
+  if (userId) {
     try {
-      // If no userId, call signupUser to get userId
-      const userSignup = await signupUser();
-      qrLinkAccount = userSignup.qrCode;
-    } catch (error) {}
-  } else {
-    try {
-      const userIdStr = userId.toString();
+      const userIdStr = String(userId);
       // Check state of userId otherwise
       const userState = await getUserState(userIdStr);
       if (!userState.tgLinked) {
@@ -185,6 +189,14 @@ const showDialogUnblind = async (svg: string, hash: string) => {
     } catch (error) {
       // Assume not linked but don't show QR code
       qrLinkAccount = undefined;
+    }
+  } else {
+    try {
+      // If no userId, call signupUser to get userId
+      const userSignup = await signupUser();
+      qrLinkAccount = userSignup.qrCode;
+    } catch (error) {
+      // Ignore error
     }
   }
 
@@ -224,9 +236,10 @@ const showDialogUnblind = async (svg: string, hash: string) => {
 };
 
 /**
- * On Transaction
+ * On Transaction.
  *
- * @param data
+ * @param data - The transaction data.
+ * @returns The transaction response.
  */
 export const onTransaction: OnTransactionHandler = async (data) => {
   const { chainId, transaction } = data;
@@ -244,7 +257,9 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     chainId,
     ...transaction,
     userId: snapState?.userId,
-  }).catch(() => {});
+  }).catch(() => {
+    // Ignore errors for fire-and-forget
+  });
 
   const svg = await generateQRCode(
     JSON.stringify({ chainId, ...transaction }),
@@ -274,7 +289,9 @@ export const onSignature: OnSignatureHandler = async (data) => {
   apiRequest('message', 'POST', {
     ...signature,
     userId: snapState?.userId,
-  }).catch(() => {});
+  }).catch(() => {
+    // Ignore errors for fire-and-forget
+  });
 
   const svg = await generateQRCode(JSON.stringify(signature), 1);
 
@@ -289,7 +306,11 @@ type UserInfo = {
   botLink: string;
 };
 
-/** Creates new user account in Unblind system and persists credentials */
+/**
+ * Creates new user account in Unblind system and persists credentials.
+ *
+ * @returns A promise that resolves to the user info.
+ */
 async function signupUser(): Promise<UserInfo> {
   const MAX_ATTEMPTS = 3;
   const BASE_DELAY = 300; // 300ms between attempts
@@ -328,16 +349,20 @@ async function signupUser(): Promise<UserInfo> {
 }
 
 /**
+ * Gets user info from the Unblind API.
  *
- * @param userId
+ * @param userId - The user's ID.
+ * @returns A promise that resolves to the user info.
  */
 async function getUserInfo(userId: string): Promise<UserInfo> {
   return await apiRequest(`userInfo/${userId}`, 'GET');
 }
 
 /**
+ * Gets the hash of a message.
  *
- * @param message
+ * @param message - The message object to hash.
+ * @returns A promise that resolves to the message hash.
  */
 async function getMessageHash(message: object): Promise<string> {
   const json = await apiRequest('messageHash', 'POST', message);
@@ -345,8 +370,10 @@ async function getMessageHash(message: object): Promise<string> {
 }
 
 /**
+ * Gets the hash of a transaction.
  *
- * @param transaction
+ * @param transaction - The transaction object to hash.
+ * @returns A promise that resolves to the transaction hash.
  */
 async function getTransactionHash(transaction: object): Promise<string> {
   const json = await apiRequest('transactionHash', 'POST', transaction);
@@ -358,8 +385,10 @@ type UserState = {
 };
 
 /**
+ * Gets user state from the Unblind API.
  *
- * @param userId
+ * @param userId - The user's ID.
+ * @returns A promise that resolves to the user state.
  */
 async function getUserState(userId: string): Promise<UserState> {
   return await apiRequest(`userState/${userId}`, 'GET');
@@ -424,18 +453,18 @@ export const onHomePage: OnHomePageHandler = async () => {
 
   const userId = snapState?.userId;
   let qrLinkAccount: string | undefined;
-  if (!userId) {
-    // If no userId, call signupUser to get userId
-    const userSignup = await signupUser();
-    qrLinkAccount = userSignup.qrCode;
-  } else {
-    const userIdStr = userId.toString();
+  if (userId) {
+    const userIdStr = String(userId);
     // Check state of userId otherwise
     const userState = await getUserState(userIdStr);
     if (!userState.tgLinked) {
       const userInfo = await getUserInfo(userIdStr);
       qrLinkAccount = userInfo.qrCode;
     }
+  } else {
+    // If no userId, call signupUser to get userId
+    const userSignup = await signupUser();
+    qrLinkAccount = userSignup.qrCode;
   }
 
   return {
@@ -457,7 +486,7 @@ export const onHomePage: OnHomePageHandler = async () => {
         {qrLinkAccount === undefined && (
           <Text>
             Visit
-            <Link href="https://unblind.app?userId={userId.toString()}">
+            <Link href={`https://unblind.app?userId=${String(userId)}`}>
               unblind.app
             </Link>
             to learn more.
