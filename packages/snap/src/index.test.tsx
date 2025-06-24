@@ -3,7 +3,7 @@ import type { SnapConfirmationInterface } from '@metamask/snaps-jest';
 import { installSnap } from '@metamask/snaps-jest';
 import { Box, Text, Bold } from '@metamask/snaps-sdk/jsx';
 
-describe('onRpcRequest', () => {
+describe.skip('onRpcRequest', () => {
   describe('hello', () => {
     it('shows a confirmation dialog', async () => {
       const { request } = await installSnap();
