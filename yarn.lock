@@ -19149,7 +19149,7 @@ __metadata:
     "@jest/globals": ^29.5.0
     "@metamask/snaps-cli": ^6.6.0
     "@metamask/snaps-jest": ^8.9.0
-    "@metamask/snaps-sdk": ~6.18.0
+    "@metamask/snaps-sdk": ~8.1.0
     "@types/react": 18.2.4
     "@types/react-dom": 18.2.4
     eslint: ^9.11.0
