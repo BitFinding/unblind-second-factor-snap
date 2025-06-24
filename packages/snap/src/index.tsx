@@ -66,13 +66,8 @@ function compressData(data: string): string {
   // Compress using deflate
   const compressed = deflateSync(byteArray, { level: 9 });
 
-  // Convert compressed array to Uint8Array for base64 encoding
-  const compressedArray = new Uint8Array(compressed);
-
-  // Convert to base64
-  return btoa(
-    String.fromCharCode.apply(null, compressedArray as unknown as number[]),
-  );
+  // Convert compressed byte array to a base64 string
+  return Buffer.from(compressed).toString('base64');
 }
 
 /**
