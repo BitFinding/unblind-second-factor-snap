@@ -90,7 +90,9 @@ async function generateQRCode(data: string, mode: number): Promise<string> {
 }
 
 /**
+ * Gets the user ID from snap state.
  *
+ * @returns A promise that resolves to the user ID, or undefined if not found.
  */
 async function getUserId(): Promise<string | undefined> {
   const snapState = await snap.request({
@@ -108,7 +110,10 @@ async function getUserId(): Promise<string | undefined> {
 }
 
 /**
+ * Gets the QR code link for account linking.
  *
+ * @returns A promise that resolves to the QR code link, or undefined if not
+ * applicable.
  */
 async function getQrLink(): Promise<string | undefined> {
   const userId = await getUserId();
@@ -117,14 +122,12 @@ async function getQrLink(): Promise<string | undefined> {
   if (userId) {
     try {
       // Check state of userId otherwise
-      const userState = await getUserState(userId);
-      if (!userState.tgLinked) {
-        const userInfo = await getUserInfo(userId);
+      const userInfo = await getUserInfo(userId);
+      if (!userInfo.tgLinked) {
         qrLinkAccount = userInfo.qrCode;
       }
     } catch (error) {
-      // Assume not linked but don't show QR code
-      qrLinkAccount = undefined;
+      // Ignore error
     }
   } else {
     try {
@@ -262,6 +265,7 @@ type UserInfo = {
   userId: string;
   qrCode: string;
   botLink: string;
+  tgLinked: boolean;
 };
 
 /**
@@ -336,20 +340,6 @@ async function getMessageHash(message: object): Promise<string> {
 async function getTransactionHash(transaction: object): Promise<string> {
   const json = await apiRequest('transactionHash', 'POST', transaction);
   return json.hash;
-}
-
-type UserState = {
-  tgLinked: boolean;
-};
-
-/**
- * Gets user state from the Unblind API.
- *
- * @param userId - The user's ID.
- * @returns A promise that resolves to the user state.
- */
-async function getUserState(userId: string): Promise<UserState> {
-  return await apiRequest(`userState/${userId}`, 'GET');
 }
 
 export const onInstall: OnInstallHandler = async () => {
