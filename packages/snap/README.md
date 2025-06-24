@@ -84,26 +84,18 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 
 ---
 
-## Screenshots & GIFs
+## Screenshots
 
-> **Please add the following artifacts for a richer README:**
-> - **Pairing QR code** (shown at install)
-> - **Telegram digest** (what the user sees in Telegram)
-> - **QR code at signing** (for privacy mode)
-> - **Mobile app scanning QR** (optional)
-> - **Hardware wallet hash comparison** (optional)
-> - **GIF:** End-to-end flow (optional)
-
-![Pairing QR code](./screenshots/pairing-qr.png)
+![Pairing QR code](./screenshots/unblind-pairing-qr.png)
 *Scan this QR code in MetaMask to link your Telegram account.*
 
-![Telegram digest](./screenshots/telegram-digest.png)
+![Telegram digest](./screenshots/unblind-telegram-digest.png)
 *Example of a human-readable digest sent to Telegram.*
 
-![QR code at signing](./screenshots/qr-signing.png)
-*QR code shown for privacy mode.*
+![Mobile app scanning QR](./screenshots/unblind-mobile-app-scan.png)
+*Scan the QR code with our companion app for out-of-band verification.*
 
-![Mobile app scanning QR](./screenshots/mobile-app-scan.png)
+![Mobile app Analisys](./screenshots/unblind-mobile-app-digest.png)
 *Scan the QR code with our companion app for out-of-band verification.*
 
 ![Hardware wallet hash comparison](./screenshots/hw-hash.png)
