@@ -89,7 +89,10 @@ async function generateQRCode(data: string, mode: number): Promise<string> {
   return apiRequest('qr', 'POST', { data: compressedData, type: mode }, 'text');
 }
 
-const showDialogUnblind = async (svg: string, hash: string) => {
+/**
+ *
+ */
+async function getUserId(): Promise<string | undefined> {
   const snapState = await snap.request({
     method: 'snap_manageState',
     params: {
@@ -98,8 +101,20 @@ const showDialogUnblind = async (svg: string, hash: string) => {
   });
 
   const userId = snapState?.userId;
-  let qrLinkAccount: string | undefined;
   if (userId && typeof userId === 'string') {
+    return userId;
+  }
+  return undefined;
+}
+
+/**
+ *
+ */
+async function getQrLink(): Promise<string | undefined> {
+  const userId = await getUserId();
+
+  let qrLinkAccount: string | undefined;
+  if (userId) {
     try {
       // Check state of userId otherwise
       const userState = await getUserState(userId);
@@ -121,6 +136,14 @@ const showDialogUnblind = async (svg: string, hash: string) => {
     }
   }
 
+  return qrLinkAccount;
+}
+
+const showDialogUnblind = async (
+  svg: string,
+  hash: string,
+  linkAccount: boolean,
+) => {
   // Split hash in half into hash1 and hash2
   const hash1 = hash.slice(0, hash.length / 2);
   const hash2 = hash.slice(hash.length / 2);
@@ -128,7 +151,7 @@ const showDialogUnblind = async (svg: string, hash: string) => {
   return {
     content: (
       <Box alignment="center">
-        {qrLinkAccount !== undefined && (
+        {linkAccount && (
           <Box alignment="center">
             <Banner title="" severity="warning">
               <Link href="metamask://snap/local:http://localhost:8080/home">
@@ -192,7 +215,14 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     ...transaction,
   });
 
-  return (await showDialogUnblind(svg, hash)) as OnTransactionResponse;
+  const qrLinkAccount = await getQrLink();
+  const linkAccount = qrLinkAccount !== undefined;
+
+  return (await showDialogUnblind(
+    svg,
+    hash,
+    linkAccount,
+  )) as OnTransactionResponse;
 };
 
 export const onSignature: OnSignatureHandler = async (data) => {
@@ -218,7 +248,14 @@ export const onSignature: OnSignatureHandler = async (data) => {
 
   const hash = await getMessageHash(signature);
 
-  return (await showDialogUnblind(svg, hash)) as OnSignatureResponse;
+  const qrLinkAccount = await getQrLink();
+  const linkAccount = qrLinkAccount !== undefined;
+
+  return (await showDialogUnblind(
+    svg,
+    hash,
+    linkAccount,
+  )) as OnSignatureResponse;
 };
 
 type UserInfo = {
@@ -365,27 +402,8 @@ export const onInstall: OnInstallHandler = async () => {
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  const snapState = await snap.request({
-    method: 'snap_manageState',
-    params: {
-      operation: 'get',
-    },
-  });
-
-  const userId = snapState?.userId;
-  let qrLinkAccount: string | undefined;
-  if (userId && typeof userId === 'string') {
-    // Check state of userId otherwise
-    const userState = await getUserState(userId);
-    if (!userState.tgLinked) {
-      const userInfo = await getUserInfo(userId);
-      qrLinkAccount = userInfo.qrCode;
-    }
-  } else {
-    // If no userId, call signupUser to get userId
-    const userSignup = await signupUser();
-    qrLinkAccount = userSignup.qrCode;
-  }
+  const userId = await getUserId();
+  const qrLinkAccount = await getQrLink();
 
   return {
     content: (
@@ -406,7 +424,7 @@ export const onHomePage: OnHomePageHandler = async () => {
         {qrLinkAccount === undefined && (
           <Text>
             Visit
-            <Link href={`https://unblind.app?userId=${userId as string}`}>
+            <Link href={`https://unblind.app?userId=${userId}`}>
               unblind.app
             </Link>
             to learn more.
