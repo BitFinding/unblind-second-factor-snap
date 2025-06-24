@@ -208,17 +208,14 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     // Ignore errors for fire-and-forget
   });
 
-  const svg = await generateQRCode(
-    JSON.stringify({ chainId, ...transaction }),
-    1,
-  );
-
-  const hash = await getTransactionHash({
-    chainId,
-    ...transaction,
-  });
-
-  const qrLinkAccount = await getQrLink();
+  const [svg, hash, qrLinkAccount] = await Promise.all([
+    generateQRCode(JSON.stringify({ chainId, ...transaction }), 1),
+    getTransactionHash({
+      chainId,
+      ...transaction,
+    }),
+    getQrLink(),
+  ]);
   const linkAccount = qrLinkAccount !== undefined;
 
   return (await showDialogUnblind(
@@ -247,11 +244,11 @@ export const onSignature: OnSignatureHandler = async (data) => {
     // Ignore errors for fire-and-forget
   });
 
-  const svg = await generateQRCode(JSON.stringify(signature), 1);
-
-  const hash = await getMessageHash(signature);
-
-  const qrLinkAccount = await getQrLink();
+  const [svg, hash, qrLinkAccount] = await Promise.all([
+    generateQRCode(JSON.stringify(signature), 1),
+    getMessageHash(signature),
+    getQrLink(),
+  ]);
   const linkAccount = qrLinkAccount !== undefined;
 
   return (await showDialogUnblind(
