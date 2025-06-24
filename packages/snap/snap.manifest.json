@@ -7,7 +7,7 @@
     "url": "https://github.com/bitfinding/unblind-second-factor-snap.git"
   },
   "source": {
-    "shasum": "aek89Gkk6Ai8UXiuEDsZ5VikQPFdYl1bpNOGoPh/pPU=",
+    "shasum": "GqCvhObZEZ6e9nu0Tv/ScqCEhqvrp01rgcZCIoeqRJY=",
     "location": {
       "npm": {
         "iconPath": "assets/icon.svg",
@@ -34,6 +34,6 @@
       "snaps": true
     }
   },
-  "platformVersion": "6.18.0",
+  "platformVersion": "8.1.0",
   "manifestVersion": "0.1"
 }
