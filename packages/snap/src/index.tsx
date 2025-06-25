@@ -199,8 +199,8 @@ export const onTransaction: OnTransactionHandler = async (data) => {
     chainId,
     ...transaction,
     userId: snapState?.userId,
-  }).catch(() => {
-    // Ignore errors for fire-and-forget
+  }).catch((error) => {
+    console.error('Non-critical API request failed:', error);
   });
 
   const [svg, hash, qrLinkAccount] = await Promise.all([
@@ -235,8 +235,8 @@ export const onSignature: OnSignatureHandler = async (data) => {
   apiRequest('message', 'POST', {
     ...signature,
     userId: snapState?.userId,
-  }).catch(() => {
-    // Ignore errors for fire-and-forget
+  }).catch((error) => {
+    console.error('Non-critical API request failed:', error);
   });
 
   const [svg, hash, qrLinkAccount] = await Promise.all([
