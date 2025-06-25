@@ -17,7 +17,7 @@ Semantic Second Factor Snap is a MetaMask Snap that acts as a semantic second fa
 - [How It Works](#how-it-works)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Screenshots & GIFs](#screenshots--gifs)
+- [Screenshots & GIFs](#Screenshots)
 - [Example Flows](#example-flows)
 - [Configuration](#configuration)
 - [Related Work](#related-work)
@@ -98,7 +98,7 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 ![Mobile app Analisys](./screenshots/unblind-mobile-app-digest.png)
 *Scan the QR code with our companion app for out-of-band verification.*
 
-![Hardware wallet hash comparison](./screenshots/hw-hash.png)
+![Hardware wallet hash comparison](./screenshots/unblind-hw-hash.png)
 *Compare the hash in the digest with your hardware wallet.*
 
 ---
