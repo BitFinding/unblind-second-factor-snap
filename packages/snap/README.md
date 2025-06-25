@@ -18,9 +18,6 @@ Semantic Second Factor Snap is a MetaMask Snap that acts as a semantic second fa
 - [Installation](#installation)
 - [Usage](#usage)
 - [Screenshots & GIFs](#Screenshots)
-- [Example Flows](#example-flows)
-- [Configuration](#configuration)
-- [Related Work](#related-work)
 - [Feedback & Contributions](#feedback--contributions)
 - [License](#license)
 
