@@ -12,7 +12,7 @@
       "npm": {
         "iconPath": "assets/icon.svg",
         "filePath": "dist/bundle.js",
-        "packageName": "unblind-second-factor-snap",
+        "packageName": "@bitfinding/unblind-second-factor-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }

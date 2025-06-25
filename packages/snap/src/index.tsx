@@ -152,7 +152,7 @@ const showDialogUnblind = async (
         {linkAccount && (
           <Box alignment="center">
             <Banner title="" severity="warning">
-              <Link href="metamask://snap/local:http://localhost:8080/home">
+              <Link href="metamask://snap/npm:@bitfinding/unblind-second-factor-snap/home">
                 Connect your telegram
               </Link>
             </Banner>

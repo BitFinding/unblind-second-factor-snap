@@ -23,7 +23,7 @@
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
     "lint:misc": "prettier '**/*.json' '**/*.md' '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
     "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
-    "test": "yarn workspace unblind-second-factor-snap run test"
+    "test": "yarn workspace @bitfinding/unblind-second-factor-snap run test"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.0.0",

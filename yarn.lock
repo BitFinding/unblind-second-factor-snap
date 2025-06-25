@@ -19402,9 +19402,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unblind-second-factor-snap@workspace:packages/snap":
+"@bitfinding/unblind-second-factor-snap@workspace:packages/snap":
   version: 0.0.0-use.local
-  resolution: "unblind-second-factor-snap@workspace:packages/snap"
+  resolution: "@bitfinding/unblind-second-factor-snap@workspace:packages/snap"
   dependencies:
     "@jest/globals": ^29.5.0
     "@metamask/snaps-cli": ^6.6.0
