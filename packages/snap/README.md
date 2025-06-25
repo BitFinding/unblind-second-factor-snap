@@ -10,20 +10,6 @@ Semantic Second Factor Snap is a MetaMask Snap that acts as a semantic second fa
 
 ---
 
-## Table of Contents
-
-- [Features](#features)
-- [Why This Matters](#why-this-matters)
-- [How It Works](#how-it-works)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Screenshots & GIFs](#Screenshots)
-- [Feedback & Contributions](#feedback--contributions)
-- [License](#license)
-
----
-
-## Features
 
 - **Out-of-band verification:** Human-readable digests sent to your Telegram or shown as a QR code.
 - **Hardware wallet compatible:** Compare the signing hash in the digest with your hardware wallet for extra security.
