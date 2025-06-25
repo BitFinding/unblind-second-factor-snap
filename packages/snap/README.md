@@ -131,16 +131,6 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 
 ---
 
-## Example Flows
-
-> **Add screenshots or code snippets here to show:**
-> - Signing a transaction and receiving a digest in Telegram.
-> - Using QR-only mode and scanning with the mobile app.
-> - Verifying a signing hash with a hardware wallet.
-
-
----
-
 ## Feedback & Contributions
 
 We welcome your feedback, questions, and contributions!
