@@ -135,7 +135,7 @@ We welcome your feedback, questions, and contributions!
 - **Found a bug or have a feature request?**
   - Please [open an issue](https://github.com/BitFinding/snap/issues) on GitHub.
 - **Need help or want to discuss ideas?**
-  - Join the conversation via [Telegram](https://t.me/BitFindingBot) or reach out to us on [X (Twitter)](https://x.com/BitFinding).
+  - Join the conversation via [Telegram](https://t.me/+pe-RvyED10M0Y2E8) or reach out to us on [X (Twitter)](https://x.com/BitFinding).
 
 Your input helps us make this project better for everyone. Thank you for being part of the community!
 
