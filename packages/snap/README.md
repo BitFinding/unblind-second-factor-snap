@@ -138,19 +138,23 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 > - Using QR-only mode and scanning with the mobile app.
 > - Verifying a signing hash with a hardware wallet.
 
----
-
-## Configuration
-
-*Coming soon: support for custom destinations, digest formats, and alternate communication channels.*
-
 
 ---
 
 ## Feedback & Contributions
 
-We welcome feedback, issue reports, and contributions!  
-Open a GitHub issue or contact us via Telegram through the bot.
+We welcome your feedback, questions, and contributions!
 
-https://x.com/BitFinding
+- **Found a bug or have a feature request?**
+  - Please [open an issue](https://github.com/BitFinding/snap/issues) on GitHub.
+- **Need help or want to discuss ideas?**
+  - Join the conversation via [Telegram](https://t.me/BitFindingBot) or reach out to us on [X (Twitter)](https://x.com/BitFinding).
+
+Your input helps us make this project better for everyone. Thank you for being part of the community!
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
