@@ -6,7 +6,7 @@
 
 ## ✨ Overview
 
-Semantic Second Factor Snap is a MetaMask Snap that acts as a semantic second factor for transaction and message signing. It provides out-of-band, human-readable digests of signing requests, sent to your Telegram or shown as a QR code, so you can verify what you’re about to sign—even if your browser or dApp is compromised.
+Semantic Second Factor Snap is a MetaMask Snap that acts as a semantic second factor for transaction and message signing. It provides out-of-band, human-readable digests of signing requests, sent to your Telegram or shown as a QR code, so you can verify what you're about to sign—even if your browser or dApp is compromised.
 
 ---
 
@@ -32,7 +32,7 @@ Semantic Second Factor Snap is a MetaMask Snap that acts as a semantic second fa
 - **Hardware wallet compatible:** Compare the signing hash in the digest with your hardware wallet for extra security.
 - **Privacy mode:** Use QR-only mode for maximum privacy—no data sent to Telegram.
 - **Companion mobile app:** Scan QR codes on a separate device for air-gapped verification.
-- **Reduces trust in dApp/browser:** Even if your browser or MetaMask is compromised, you get an independent, semantic summary of what you’re signing.
+- **Reduces trust in dApp/browser:** Even if your browser or MetaMask is compromised, you get an independent, semantic summary of what you're signing.
 
 ---
 
@@ -60,9 +60,9 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 
 1. **Enable MetaMask Snaps** (requires MetaMask Flask or compatible release).
 2. **Install this Snap** from our repo.
-3. **Pair with Telegram**: On first run, you’ll be shown a QR code to link your Telegram account with our bot.
+3. **Pair with Telegram**: On first run, you'll be shown a QR code to link your Telegram account with our bot.
 
-*Once paired, you’re ready to go!*
+*Once paired, you're ready to go!*
 
 ---
 
@@ -86,20 +86,30 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 
 ## Screenshots
 
-![Pairing QR code](./screenshots/unblind-pairing-qr.png)
-*Scan this QR code in MetaMask to link your Telegram account.*
+<p align="center">
+  <img src="./screenshots/unblind-pairing-qr.png" width="75%" alt="Pairing QR code" />
+</p>
+<p align="center"><em>Scan this QR code in MetaMask to link your Telegram account.</em></p>
 
-![Telegram digest](./screenshots/unblind-telegram-digest.png)
-*Example of a human-readable digest sent to Telegram.*
+<p align="center">
+  <img src="./screenshots/unblind-telegram-digest.png" width="75%" alt="Telegram digest" />
+</p>
+<p align="center"><em>Example of a human-readable digest sent to Telegram.</em></p>
 
-![Mobile app scanning QR](./screenshots/unblind-mobile-app-scan.png)
-*Scan the QR code with our companion app for out-of-band verification.*
+<p align="center">
+  <img src="./screenshots/unblind-mobile-app-scan.png" width="75%" alt="Mobile app scanning QR" />
+</p>
+<p align="center"><em>Scan the QR code with our companion app for out-of-band verification.</em></p>
 
-![Mobile app Analisys](./screenshots/unblind-mobile-app-digest.png)
-*Scan the QR code with our companion app for out-of-band verification.*
+<p align="center">
+  <img src="./screenshots/unblind-mobile-app-digest.png" width="75%" alt="Mobile app Analysis" />
+</p>
+<p align="center"><em>Scan the QR code with our companion app for out-of-band verification.</em></p>
 
-![Hardware wallet hash comparison](./screenshots/unblind-hw-hash.png)
-*Compare the hash in the digest with your hardware wallet.*
+<p align="center">
+  <img src="./screenshots/hw-hash.png" width="75%" alt="Hardware wallet hash comparison" />
+</p>
+<p align="center"><em>Compare the hash in the digest with your hardware wallet.</em></p>
 
 ---
 
@@ -116,13 +126,6 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 
 *Coming soon: support for custom destinations, digest formats, and alternate communication channels.*
 
----
-
-## Related Work
-
-Inspired by [Semantic Signing](https://bitfinding.com/blog/semantic-second-factor) and designed to complement hardware wallets.
-
-This Snap offers similar goals to [Wallet Guard Snap](https://github.com/wallet-guard/wallet-guard-snap), but emphasizes out-of-band communication, hash matching, and semantic context.
 
 ---
 
@@ -131,12 +134,5 @@ This Snap offers similar goals to [Wallet Guard Snap](https://github.com/wallet-
 We welcome feedback, issue reports, and contributions!  
 Open a GitHub issue or contact us via Telegram through the bot.
 
----
+https://x.com/BitFinding
 
-## License
-
-[MIT](../../LICENSE.MIT0) or [Apache 2.0](../../LICENSE.APACHE2) (choose one or both as appropriate).
-
----
-
-*Let me know when you have screenshots or if you want to add more technical details, and I’ll update the README accordingly!*
