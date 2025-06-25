@@ -1,6 +1,6 @@
 {
   "name": "@bitfinding/unblind-second-factor-snap",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Get Telegram notifications with clear information of what you are about to sign.",
   "repository": {
     "type": "git",

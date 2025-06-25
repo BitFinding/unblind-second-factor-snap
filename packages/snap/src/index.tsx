@@ -405,10 +405,10 @@ export const onHomePage: OnHomePageHandler = async () => {
         )}
         {qrLinkAccount === undefined && (
           <Text>
-            Visit
+            Visit{' '}
             <Link href={`https://unblind.app?userId=${userId}`}>
               unblind.app
-            </Link>
+            </Link>{' '}
             to learn more.
           </Text>
         )}
