@@ -1665,6 +1665,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bitfinding/unblind-second-factor-snap@workspace:packages/snap":
+  version: 0.0.0-use.local
+  resolution: "@bitfinding/unblind-second-factor-snap@workspace:packages/snap"
+  dependencies:
+    "@jest/globals": ^29.5.0
+    "@metamask/snaps-cli": ^6.6.0
+    "@metamask/snaps-jest": ^9.1.0
+    "@metamask/snaps-sdk": ~6.24.0
+    "@types/react": 18.2.4
+    "@types/react-dom": 18.2.4
+    eslint: ^9.11.0
+    fflate: ^0.8.2
+    jest: ^29.5.0
+    rimraf: ^3.0.2
+    ts-jest: ^29.1.0
+    typescript: ~5.7.3
+  languageName: unknown
+  linkType: soft
+
 "@builder.io/partytown@npm:^0.7.5":
   version: 0.7.6
   resolution: "@builder.io/partytown@npm:0.7.6"
@@ -19401,25 +19420,6 @@ __metadata:
   checksum: 264302acabbc71ef279cfb832d6bb53096a12618e9ef8465b274c5a3fffa5f4da6cf7b8d024fec53a7114742c132bba9f6a6d4d4b5eca2bb55d556d0c57a9f15
   languageName: node
   linkType: hard
-
-"@bitfinding/unblind-second-factor-snap@workspace:packages/snap":
-  version: 0.0.0-use.local
-  resolution: "@bitfinding/unblind-second-factor-snap@workspace:packages/snap"
-  dependencies:
-    "@jest/globals": ^29.5.0
-    "@metamask/snaps-cli": ^6.6.0
-    "@metamask/snaps-jest": ^9.1.0
-    "@metamask/snaps-sdk": ~6.24.0
-    "@types/react": 18.2.4
-    "@types/react-dom": 18.2.4
-    eslint: ^9.11.0
-    fflate: ^0.8.2
-    jest: ^29.5.0
-    rimraf: ^3.0.2
-    ts-jest: ^29.1.0
-    typescript: ~5.7.3
-  languageName: unknown
-  linkType: soft
 
 "unbox-primitive@npm:^1.0.2":
   version: 1.0.2
