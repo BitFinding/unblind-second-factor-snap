@@ -67,6 +67,7 @@ function compressData(data: string): string {
   const compressed = deflateSync(byteArray, { level: 9 });
 
   // Convert compressed byte array to a base64 string
+  // eslint-disable-next-line no-restricted-globals
   return Buffer.from(compressed).toString('base64');
 }
 
