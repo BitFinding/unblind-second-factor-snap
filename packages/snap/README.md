@@ -86,30 +86,48 @@ Browser wallets and dApps can be compromised. This Snap gives you:
 
 ## Screenshots
 
-<p align="center">
-  <img src="./screenshots/unblind-pairing-qr.png" width="75%" alt="Pairing QR code" />
-</p>
-<p align="center"><em>Scan this QR code in MetaMask to link your Telegram account.</em></p>
+### 1. Connect Your Telegram for Second Factor Notifications
 
 <p align="center">
-  <img src="./screenshots/unblind-telegram-digest.png" width="75%" alt="Telegram digest" />
+  <img src="./screenshots/unblind-pairing-qr.png" width="25%" alt="Pairing QR code" />
 </p>
-<p align="center"><em>Example of a human-readable digest sent to Telegram.</em></p>
+<p align="center"><em>Scan this QR code in MetaMask to link your Telegram account and receive second factor notifications for your blockchain transactions.</em></p>
+
+---
+
+### 2. Receive Human-Readable Transaction Summaries
 
 <p align="center">
-  <img src="./screenshots/unblind-mobile-app-scan.png" width="75%" alt="Mobile app scanning QR" />
+  <img src="./screenshots/unblind-telegram-digest.png" width="50%" alt="Telegram digest" />
 </p>
-<p align="center"><em>Scan the QR code with our companion app for out-of-band verification.</em></p>
+<p align="center"><em>Example of a human-readable digest sent to your Telegram, so you can understand what you are signing before you approve.</em></p>
+
+---
+
+### 3. Prefer Not to Use Telegram? Use Our Mobile App
 
 <p align="center">
-  <img src="./screenshots/unblind-mobile-app-digest.png" width="75%" alt="Mobile app Analysis" />
+  <img src="./screenshots/unblind-mobile-app-scan.png" width="50%" alt="Mobile app scanning QR" />
 </p>
-<p align="center"><em>Scan the QR code with our companion app for out-of-band verification.</em></p>
+<p align="center"><em>Instead of Telegram, you can scan the QR code with our <a href="https://unblind.app">online app</a> from your mobile device for out-of-band verification.</em></p>
+
+---
+
+### 4. View the Signing Request Explanation in the App
 
 <p align="center">
-  <img src="./screenshots/hw-hash.png" width="75%" alt="Hardware wallet hash comparison" />
+  <img src="./screenshots/unblind-mobile-app-digest.png" width="50%" alt="Mobile app digest" />
 </p>
-<p align="center"><em>Compare the hash in the digest with your hardware wallet.</em></p>
+<p align="center"><em>The mobile app will show a clear explanation of the signing request. No Telegram required.</em></p>
+
+---
+
+### 5. Hardware Wallet Hash Comparison
+
+<p align="center">
+  <img src="./screenshots/unblind-hardware-hash.png" width="50%" alt="Hardware wallet hash comparison" />
+</p>
+<p align="center"><em>Compare the hash in the digest with your hardware wallet for maximum security.</em></p>
 
 ---
 
