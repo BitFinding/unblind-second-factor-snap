@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Get Telegram notifications with clear information of what you are about to sign.",
   "proposedName": "Unblind Second Factor",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/bitfinding/unblind-second-factor-snap.git"
   },
   "source": {
-    "shasum": "03wRF4n1sxcHykGHolPumOE1EnyoUnjNAA338cCisuQ=",
+    "shasum": "TFShtGXesoy/yC1unUADT5KCt6jSwXG8wwXskWC0tZ4=",
     "location": {
       "npm": {
         "iconPath": "assets/icon.svg",
