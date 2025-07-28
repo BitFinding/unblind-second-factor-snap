@@ -185,7 +185,7 @@ const showDialogUnblind = async (
  * @returns The transaction response.
  */
 export const onTransaction: OnTransactionHandler = async (data) => {
-  const { chainId, transaction } = data;
+  const { chainId, transaction, transactionOrigin } = data;
 
   // Persist user state in encrypted snap storage
   const snapState = await snap.request({
@@ -198,6 +198,7 @@ export const onTransaction: OnTransactionHandler = async (data) => {
   // Fire-and-forget fetch - don't wait for response
   apiRequest('transaction', 'POST', {
     chainId,
+    origin: transactionOrigin,
     ...transaction,
     userId: snapState?.userId,
   }).catch((error) => {
@@ -234,6 +235,7 @@ export const onSignature: OnSignatureHandler = async (data) => {
 
   // Fire-and-forget fetch - don't wait for response
   apiRequest('message', 'POST', {
+    origin: signatureOrigin,
     ...signature,
     userId: snapState?.userId,
   }).catch((error) => {
